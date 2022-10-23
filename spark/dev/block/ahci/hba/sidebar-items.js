@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["COMMAND_TABLE_PRDT_COUNT",""]],"static":[["COMMAND",""],["COMMAND_TBL",""],["FIS_RECEIVED",""]],"struct":[["Command",""],["CommandTable",""],["FisReceived","For the HBA to write received FISes. DO NOT read or write to this."],["HostToDevice",""],["Memory",""],["PRDT",""],["Port",""],["PortIterator",""]]};

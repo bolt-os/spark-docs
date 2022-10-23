@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["init",""],["print_fmt",""]],"static":[["LOGGER",""],["WRITER",""]],"struct":[["Logger",""],["Writer",""]]};
