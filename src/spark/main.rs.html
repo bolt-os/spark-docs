@@ -341,11 +341,6 @@
 <span id="341">341</span>
 <span id="342">342</span>
 <span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -405,6 +400,7 @@
 #![allow(
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
+    clippy::cast_ptr_alignment,
     clippy::enum_glob_use,
     clippy::inline_always,
     clippy::items_after_statements,
@@ -443,6 +439,7 @@
 <span class="kw">mod </span>rtld;
 <span class="kw">mod </span>test;
 <span class="kw">mod </span>time;
+<span class="kw">mod </span>trap;
 
 <span class="kw">pub use </span>anyhow::Result;
 <span class="kw">pub use </span>mem::{pmm, vmm};
@@ -460,13 +457,6 @@
     <span class="kw">loop </span>{
         core::hint::spin_loop();
     }
-}
-
-<span class="doccomment">/// # Safety
-</span><span class="attribute">#[no_mangle]
-</span><span class="kw">pub unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn </span>trap_handler() {
-    <span class="macro">println!</span>(<span class="string">&quot;trap!&quot;</span>);
-    hcf();
 }
 
 <span class="kw">static </span>DTB_PTR: AtomicPtr&lt;u8&gt; = AtomicPtr::new(ptr::null_mut());
@@ -498,7 +488,7 @@
 
     </span>DTB_PTR.store(dtb_ptr, Ordering::Relaxed);
 
-    <span class="kw">let </span><span class="kw-2">mut </span>vmspace = vmm::init_from_fdt(<span class="kw-2">&amp;</span>fdt, hartid);
+    <span class="kw">let </span><span class="kw-2">mut </span>vmspace = vmm::init_from_fdt(fdt, hartid);
     <span class="kw">let </span>fw_cfg = {
         <span class="kw">let </span>fdt_node = fdt.find_compatible(<span class="kw-2">&amp;</span>[<span class="string">&quot;qemu,fw-cfg-mmio&quot;</span>]).unwrap();
         <span class="kw">let </span>mmio_window = fdt_node.reg().unwrap().next().unwrap();
@@ -524,7 +514,7 @@
     <span class="macro">log::info!</span>(<span class="string">&quot;reloc slide:   {:#018x}&quot;</span>, rtld_object.reloc_base);
     <span class="macro">log::info!</span>(<span class="string">&quot;entry point:   {:#018x}&quot;</span>, kernel_elf.entry_point());
 
-    proto::handle_requests(hartid, <span class="kw-2">&amp;</span>rtld_object, <span class="kw-2">&amp;</span>vmspace, <span class="kw-2">&amp;</span>fdt);
+    proto::handle_requests(hartid, <span class="kw-2">&amp;</span>rtld_object, <span class="kw-2">&amp;</span>vmspace, fdt);
 
     <span class="kw">let </span>tp = rtld_object.allocate_tls(hartid, <span class="kw-2">&amp;mut </span>vmspace);
 
