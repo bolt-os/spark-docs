@@ -2,7 +2,7 @@ var sourcesIndex = JSON.parse('{\
 "anyhow":["",[],["backtrace.rs","chain.rs","context.rs","ensure.rs","error.rs","fmt.rs","kind.rs","lib.rs","macros.rs","ptr.rs","wrapper.rs"]],\
 "bitflags":["",[],["lib.rs"]],\
 "cfg_if":["",[],["lib.rs"]],\
-"elf":["",[["arch",[["riscv64",[],["reloc.rs"]]]]],["dynamic.rs","lib.rs","reloc.rs","section.rs","segment.rs","symbol.rs","types.rs"]],\
+"elf":["",[],["dynamic.rs","lib.rs","reloc.rs","section.rs","segment.rs","symbol.rs","types.rs"]],\
 "fdt":["",[],["lib.rs","node.rs","parsing.rs","standard_nodes.rs"]],\
 "gimli":["",[["read",[],["addr.rs","aranges.rs","cfi.rs","endian_slice.rs","index.rs","lists.rs","loclists.rs","mod.rs","op.rs","reader.rs","rnglists.rs","str.rs","util.rs","value.rs"]]],["arch.rs","common.rs","constants.rs","endianity.rs","leb128.rs","lib.rs"]],\
 "libsa":["",[],["endian.rs","lib.rs","volatile.rs"]],\
