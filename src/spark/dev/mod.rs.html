@@ -119,8 +119,8 @@
 }
 
 <span class="kw">pub fn </span>device_drivers() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[DeviceDriver] {
-    <span class="kw">let </span>drivers_start = <span class="macro">extern_sym!</span>(__device_drivers <span class="kw">as </span>DeviceDriver);
-    <span class="kw">let </span>drivers_end = <span class="macro">extern_sym!</span>(__end_device_drivers <span class="kw">as </span>DeviceDriver);
+    <span class="kw">let </span>drivers_start = <span class="macro">extern_sym!</span>(__start_device_drivers <span class="kw">as </span>DeviceDriver);
+    <span class="kw">let </span>drivers_end = <span class="macro">extern_sym!</span>(__stop_device_drivers <span class="kw">as </span>DeviceDriver);
     <span class="kw">let </span>len = (drivers_end.addr() - drivers_start.addr()) / size_of::&lt;DeviceDriver&gt;();
 
     <span class="kw">unsafe </span>{ core::slice::from_raw_parts(drivers_start, len) }
@@ -147,4 +147,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="spark" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0-nightly (1898c34e9 2022-10-26)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="spark" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0-nightly (0da281b60 2022-10-27)" ></div></body></html>
