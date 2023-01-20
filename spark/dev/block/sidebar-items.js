@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["register_block_device",""]],"mod":[["ahci",""]],"static":[["BLOCK_DEVICES",""]],"trait":[["BlockDevice",""]]};
+window.SIDEBAR_ITEMS = {"constant":[["PARTITION_TYPE_UNUSED",""]],"enum":[["PartitionType",""]],"fn":[["register",""]],"mod":[["ahci",""]],"static":[["DISKS",""]],"struct":[["Disk",""],["GptHeader",""],["GptPartitionAttrs",""],["GptPartitionEntry",""],["MbrPartitionEntry",""],["Volume",""]],"trait":[["BlockIo","Devices which provide a block-oriented interface"],["__BitFlags",""]]};
