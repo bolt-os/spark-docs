@@ -331,6 +331,12 @@
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
 <a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022-2023 xvanc and contributors
  *
@@ -364,10 +370,11 @@
 </span><span class="kw">use crate</span>::{io, size_of};
 <span class="kw">use </span>alloc::sync::{Arc, Weak};
 <span class="kw">use </span>core::{cmp, fmt::Debug};
-<span class="kw">use </span>spin::RwLock;
+<span class="kw">use </span>spin::{mutex::SpinMutex, RwLock};
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">pub mod </span>ahci;
+<span class="kw">pub mod </span>nvme;
 
 <span class="doccomment">/// Devices which provide a block-oriented interface
 </span><span class="kw">pub trait </span>BlockIo: Send + Sync + Debug {
@@ -389,9 +396,14 @@
     </span>}
 
     <span class="kw">fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>offset: u64, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
+        <span class="kw">static </span>LOCAL_BUF: SpinMutex&lt;Vec&lt;u8&gt;&gt; = SpinMutex::new(<span class="macro">vec!</span>[]);
+
         <span class="kw">let </span>block_size = <span class="self">self</span>.block_size();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>local_buf = <span class="macro">vec!</span>[<span class="number">0</span>; block_size <span class="kw">as </span>usize];
+        <span class="kw">let </span><span class="kw-2">mut </span>local_buf = LOCAL_BUF.lock();
+        <span class="kw">let </span>cur_len = local_buf.len();
+        local_buf.resize(cur_len.max(block_size <span class="kw">as </span>usize), <span class="number">0</span>);
+
         <span class="kw">let </span><span class="kw-2">mut </span>buf_offset = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>count = buf.len() <span class="kw">as </span>u64;
 
@@ -665,4 +677,4 @@
     }
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (4c83bd03a 2023-01-19)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-ab1d4ae2ec52020e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (5ce39f42b 2023-01-20)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-ab1d4ae2ec52020e.css" ></div></body></html>

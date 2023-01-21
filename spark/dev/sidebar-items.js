@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["device_drivers",""],["init",""],["match_fdt_node",""]],"mod":[["block",""],["fdt",""],["fw_cfg",""],["pcie",""]],"static":[["__start_device_drivers",""],["__stop_device_drivers",""]],"struct":[["DeviceDriver",""]]};
+window.SIDEBAR_ITEMS = {"fn":[["device_drivers",""],["init",""],["match_fdt_node",""]],"mod":[["block",""],["fdt",""],["fw_cfg",""],["pcie",""]],"struct":[["DeviceDriver",""]]};
