@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["register_executable",""],["rust_panic",""],["trace_stack",""]],"mod":[["uw",""]],"static":[["SPARK_ELF",""]]};
+window.SIDEBAR_ITEMS = {"fn":[["register_executable",""],["rust_panic",""],["trace_stack",""]],"mod":[["uw",""]],"static":[["IN_PANIC",""],["SPARK_ELF",""]]};

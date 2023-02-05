@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"static":[["MALLOC",""]],"struct":[["BadButGoodEnoughAllocator",""]]};
+window.SIDEBAR_ITEMS = {"fn":[["__rg_alloc",""],["__rg_alloc_zeroed",""],["__rg_dealloc",""],["__rg_realloc",""]],"static":[["MALLOC",""]],"struct":[["BadButGoodEnoughAllocator",""]]};

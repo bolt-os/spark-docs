@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["DeviceKind",""]],"struct":[["CommandRegister",""],["Device",""],["DeviceIdent",""]]};
+window.SIDEBAR_ITEMS = {"enum":[["DeviceKind",""]],"opaque":[["",""]],"struct":[["CommandRegister",""],["Device",""],["DeviceIdent",""]],"trait":[["__BitFlags",""]]};
