@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["dump_registers",""],["trap_handler",""]],"static":[["ABI_NAMES",""],["EXCEPTION_NAMES",""],["ISA_NUMS",""]],"struct":[["TrapFrame",""]]};
+window.SIDEBAR_ITEMS = {"fn":["dump_registers","trap_handler"],"static":["ABI_NAMES","EXCEPTION_NAMES","ISA_NUMS"],"struct":["TrapFrame"]};

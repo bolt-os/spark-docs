@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["backtrace",""],["backtrace_callback",""]],"struct":[["TraceData",""]]};
+window.SIDEBAR_ITEMS = {"fn":["backtrace","backtrace_callback"],"struct":["TraceData"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["BarKind",""]],"struct":[["Bar","Base Address Register (BAR)"]]};
+window.SIDEBAR_ITEMS = {"enum":["BarKind"],"struct":["Bar"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["CellSizes","The number of cells (big endian u32s) that addresses and sizes take"],["FdtNode","A devicetree node"],["MemoryReservation","A memory reservation"],["NodeProperty","A node property"],["RawReg","A raw `reg` property value set"]]};
+window.SIDEBAR_ITEMS = {"struct":["CellSizes","FdtNode","MemoryReservation","NodeProperty","RawReg"]};

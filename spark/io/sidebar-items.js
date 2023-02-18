@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Error",""]],"fn":[["init",""],["print_fmt",""]],"static":[["LOGGER",""],["WRITER",""]],"struct":[["Logger",""],["Writer",""]],"type":[["Result",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["init","print_fmt"],"static":["LOGGER","WRITER"],"struct":["Logger","Writer"],"type":["Result"]};

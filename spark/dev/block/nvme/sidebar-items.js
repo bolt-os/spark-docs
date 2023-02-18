@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Queue","Queue Select"]],"fn":[["init_common","Common controller initialization"],["pci_init",""]],"mod":[["controller",""],["identify",""],["queue",""]],"static":[["NVME_DRIVER",""]],"struct":[["Namespace","A namespace in an NVM subsystem"],["PrpList",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Queue"],"fn":["init_common","pci_init"],"mod":["controller","identify","queue"],"static":["NVME_DRIVER"],"struct":["Namespace","PrpList"]};

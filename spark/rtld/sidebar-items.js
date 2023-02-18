@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":[["RELOC_ERROR",""],["RELOC_OK",""]],"enum":[["LoadError",""]],"fn":[["_relocate",""],["load_object","Load an ELF executable into a virtual address space"],["resolve_ifuncs","Resolve indirect function relocations"],["resolve_relocations",""]],"struct":[["Rtld",""]],"type":[["IfuncResolver",""]]};
+window.SIDEBAR_ITEMS = {"constant":["RELOC_ERROR","RELOC_OK"],"enum":["LoadError"],"fn":["_relocate","load_object","resolve_ifuncs","resolve_relocations"],"struct":["Rtld"],"type":["IfuncResolver"]};

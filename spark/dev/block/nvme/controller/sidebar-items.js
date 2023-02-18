@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["AdminCommand",""],["DataPtr",""],["IoCommand",""]],"struct":[["Capabilities","Controller Capabilities"],["CommandBuilder",""],["Controller","An NVM Express Host Controller"],["RegisterBlock","Memory-mapped registers exposed by a controller"],["SglDataBlock",""],["Status","Controller Status"]],"trait":[["__BitFlags",""]]};
+window.SIDEBAR_ITEMS = {"enum":["AdminCommand","DataPtr","IoCommand"],"struct":["Capabilities","CommandBuilder","Controller","RegisterBlock","SglDataBlock","Status"],"trait":["__BitFlags"]};

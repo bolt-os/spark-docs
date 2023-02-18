@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Volatile","A wrapper type providing volatile access to a value"],["VolatileSplitPtr","Represents a 64 bit pointer, of which its low and high bits are split in 32-bit-aligned volatile memory."]]};
+window.SIDEBAR_ITEMS = {"struct":["Volatile","VolatileSplitPtr"]};

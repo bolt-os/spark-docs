@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["DmaPacket",""],["MmioWindow",""],["MmioWindowInner",""]]};
+window.SIDEBAR_ITEMS = {"struct":["DmaPacket","MmioWindow","MmioWindowInner"]};
