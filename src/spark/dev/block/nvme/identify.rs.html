@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/dev/block/nvme/identify.rs`."><title>identify.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-1def573a4779b29b.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../../static.files/light-d59023bfa12059d2.css"><link rel="stylesheet" disabled href="../../../../../static.files/dark-1ca41bb1e10af075.css"><link rel="stylesheet" disabled href="../../../../../static.files/ayu-18b4181a2f3fb862.css"><script src="../../../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../../../source-files.js"></script><script defer src="../../../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../../spark/index.html"><img class="rust-logo" src="../../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/dev/block/nvme/identify.rs`."><title>identify.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e5308b57e507db71.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../../static.files/light-d59023bfa12059d2.css"><link rel="stylesheet" disabled href="../../../../../static.files/dark-1ca41bb1e10af075.css"><link rel="stylesheet" disabled href="../../../../../static.files/ayu-18b4181a2f3fb862.css"><script src="../../../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../../../source-files.js"></script><script defer src="../../../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../../spark/index.html"><img class="rust-logo" src="../../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -619,129 +619,129 @@
 #[derive(Debug)]
 </span><span class="kw">pub struct </span>IdentifyController {
     <span class="doccomment">/// PCI Vendor ID
-    </span>vid: u16_le,
+    </span><span class="kw">pub </span>vid: u16_le,
     <span class="doccomment">/// PCI Subsystem Vendor ID
-    </span>ssvid: u16_le,
+    </span><span class="kw">pub </span>ssvid: u16_le,
     <span class="doccomment">/// Serial Number
-    </span>sn: [u8; <span class="number">20</span>],
+    </span><span class="kw">pub </span>sn: [u8; <span class="number">20</span>],
     <span class="doccomment">/// Model Number
-    </span>mn: [u8; <span class="number">40</span>],
+    </span><span class="kw">pub </span>mn: [u8; <span class="number">40</span>],
     <span class="doccomment">/// Firmware Revision
-    </span>fr: u64_le,
+    </span><span class="kw">pub </span>fr: u64_le,
     <span class="doccomment">/// Recommended Arbitration Burst
-    </span>rab: u8,
+    </span><span class="kw">pub </span>rab: u8,
     <span class="doccomment">/// IEEE OUI Identifier
-    </span>ieee: [u8; <span class="number">3</span>],
+    </span><span class="kw">pub </span>ieee: [u8; <span class="number">3</span>],
     <span class="doccomment">/// Controller Multi-Path I/O and Namespace Sharing Capabilities
-    </span>cmic: u8,
+    </span><span class="kw">pub </span>cmic: u8,
     <span class="doccomment">/// Maximum Data Transfer Size
-    </span>mdts: u8,
+    </span><span class="kw">pub </span>mdts: u8,
     <span class="doccomment">/// Controller ID
-    </span>cntlid: u16_le,
+    </span><span class="kw">pub </span>cntlid: u16_le,
     <span class="doccomment">/// Version
-    </span>ver: u32_le,
+    </span><span class="kw">pub </span>ver: u32_le,
     <span class="doccomment">/// RTD3 Resume Latency
-    </span>rtd3r: u32_le,
-    rtd3e: u32_le,
+    </span><span class="kw">pub </span>rtd3r: u32_le,
+    <span class="kw">pub </span>rtd3e: u32_le,
     <span class="doccomment">/// Optional Asynnchronous Events Supported
-    </span>oaes: u32_le,
+    </span><span class="kw">pub </span>oaes: u32_le,
     <span class="doccomment">/// Controller Attributes
-    </span>ctratt: u32_le,
+    </span><span class="kw">pub </span>ctratt: u32_le,
     <span class="doccomment">/// Read Recovery Levels Suupported
-    </span>rrls: u16_le,
-    reserved0: [u8; <span class="number">9</span>],
+    </span><span class="kw">pub </span>rrls: u16_le,
+    <span class="kw">pub </span>reserved0: [u8; <span class="number">9</span>],
     <span class="doccomment">/// Controller Type
-    </span>cntrltype: u8,
+    </span><span class="kw">pub </span>cntrltype: u8,
     <span class="doccomment">/// FRU Globally Unique Identifier
-    </span>fguid: [u8; <span class="number">16</span>],
+    </span><span class="kw">pub </span>fguid: [u8; <span class="number">16</span>],
     <span class="doccomment">/// Command Retry Delay Time
-    </span>crdt: [u16_le; <span class="number">3</span>],
-    reserved1: [u8; <span class="number">106</span>],
-    reserved2: [u8; <span class="number">13</span>],
+    </span><span class="kw">pub </span>crdt: [u16_le; <span class="number">3</span>],
+    <span class="kw">pub </span>reserved1: [u8; <span class="number">106</span>],
+    <span class="kw">pub </span>reserved2: [u8; <span class="number">13</span>],
     <span class="doccomment">/// NVM Subsystem Report
-    </span>nvmsr: u8,
+    </span><span class="kw">pub </span>nvmsr: u8,
     <span class="doccomment">/// VPD Write Cycle Information
-    </span>vwci: u8,
+    </span><span class="kw">pub </span>vwci: u8,
     <span class="doccomment">/// Management Endpoint Capabilites
-    </span>mec: u8,
+    </span><span class="kw">pub </span>mec: u8,
     <span class="doccomment">/// Optional Admin Command Support
-    </span>oacs: u16_le,
+    </span><span class="kw">pub </span>oacs: u16_le,
     <span class="doccomment">/// Abort Command Limit
-    </span>acl: u8,
+    </span><span class="kw">pub </span>acl: u8,
     <span class="doccomment">/// Asynchronous Event Request Limit
-    </span>aerl: u8,
+    </span><span class="kw">pub </span>aerl: u8,
     <span class="doccomment">/// Firmware Updates
-    </span>frmw: u8,
+    </span><span class="kw">pub </span>frmw: u8,
     <span class="doccomment">/// Log Page Attributes
-    </span>lpa: u8,
+    </span><span class="kw">pub </span>lpa: u8,
     <span class="doccomment">/// Error Log Page Entries
-    </span>elpe: u8,
+    </span><span class="kw">pub </span>elpe: u8,
     <span class="doccomment">/// Number of Power States Support
-    </span>npss: u8,
-    avscc: u8,
-    apsta: u8,
-    wctemp: u16_le,
-    cctemp: u16_le,
-    mtfa: u16_le,
-    hmpre: u32_le,
-    hmmin: u32_le,
-    tnvmcap: [u8; <span class="number">16</span>],
-    unvmcap: [u8; <span class="number">16</span>],
-    rpmbs: u32_le,
-    edstt: u16_le,
-    dsto: u8,
-    fwug: u8,
-    kas: u16_le,
-    hctma: u16_le,
-    mntmt: u16_le,
-    mxtmt: u16_le,
-    sanicap: u32_le,
-    hmminds: u32_le,
-    hmmaxd: u16_le,
-    nsetidmax: u16_le,
-    endgidmax: u16_le,
-    anatt: u8,
-    anacap: u8,
-    anagrpmax: u32_le,
-    nanagrpid: u32_le,
-    pels: u32_le,
-    domain_identifier: u16_le,
-    reserved3: [u8; <span class="number">10</span>],
-    megcap: [u8; <span class="number">16</span>],
-    reserved4: [u8; <span class="number">128</span>],
-    sqes: u8,
-    cqes: u8,
-    maxcmd: u16_le,
-    nn: u32_le,
-    oncs: u16_le,
-    fuses: u16_le,
-    fna: u8,
-    vwc: u8,
-    awun: u16_le,
-    awupf: u16_le,
-    icsvscc: u8,
-    nwpc: u8,
-    acwu: u16_le,
-    cdfs: u16_le,
-    sgls: u32_le,
-    mnan: u32_le,
-    maxdna: [u8; <span class="number">16</span>],
-    maxcna: u32_le,
-    reserved5: [u8; <span class="number">204</span>],
+    </span><span class="kw">pub </span>npss: u8,
+    <span class="kw">pub </span>avscc: u8,
+    <span class="kw">pub </span>apsta: u8,
+    <span class="kw">pub </span>wctemp: u16_le,
+    <span class="kw">pub </span>cctemp: u16_le,
+    <span class="kw">pub </span>mtfa: u16_le,
+    <span class="kw">pub </span>hmpre: u32_le,
+    <span class="kw">pub </span>hmmin: u32_le,
+    <span class="kw">pub </span>tnvmcap: [u8; <span class="number">16</span>],
+    <span class="kw">pub </span>unvmcap: [u8; <span class="number">16</span>],
+    <span class="kw">pub </span>rpmbs: u32_le,
+    <span class="kw">pub </span>edstt: u16_le,
+    <span class="kw">pub </span>dsto: u8,
+    <span class="kw">pub </span>fwug: u8,
+    <span class="kw">pub </span>kas: u16_le,
+    <span class="kw">pub </span>hctma: u16_le,
+    <span class="kw">pub </span>mntmt: u16_le,
+    <span class="kw">pub </span>mxtmt: u16_le,
+    <span class="kw">pub </span>sanicap: u32_le,
+    <span class="kw">pub </span>hmminds: u32_le,
+    <span class="kw">pub </span>hmmaxd: u16_le,
+    <span class="kw">pub </span>nsetidmax: u16_le,
+    <span class="kw">pub </span>endgidmax: u16_le,
+    <span class="kw">pub </span>anatt: u8,
+    <span class="kw">pub </span>anacap: u8,
+    <span class="kw">pub </span>anagrpmax: u32_le,
+    <span class="kw">pub </span>nanagrpid: u32_le,
+    <span class="kw">pub </span>pels: u32_le,
+    <span class="kw">pub </span>domain_identifier: u16_le,
+    <span class="kw">pub </span>reserved3: [u8; <span class="number">10</span>],
+    <span class="kw">pub </span>megcap: [u8; <span class="number">16</span>],
+    <span class="kw">pub </span>reserved4: [u8; <span class="number">128</span>],
+    <span class="kw">pub </span>sqes: u8,
+    <span class="kw">pub </span>cqes: u8,
+    <span class="kw">pub </span>maxcmd: u16_le,
+    <span class="kw">pub </span>nn: u32_le,
+    <span class="kw">pub </span>oncs: u16_le,
+    <span class="kw">pub </span>fuses: u16_le,
+    <span class="kw">pub </span>fna: u8,
+    <span class="kw">pub </span>vwc: u8,
+    <span class="kw">pub </span>awun: u16_le,
+    <span class="kw">pub </span>awupf: u16_le,
+    <span class="kw">pub </span>icsvscc: u8,
+    <span class="kw">pub </span>nwpc: u8,
+    <span class="kw">pub </span>acwu: u16_le,
+    <span class="kw">pub </span>cdfs: u16_le,
+    <span class="kw">pub </span>sgls: u32_le,
+    <span class="kw">pub </span>mnan: u32_le,
+    <span class="kw">pub </span>maxdna: [u8; <span class="number">16</span>],
+    <span class="kw">pub </span>maxcna: u32_le,
+    <span class="kw">pub </span>reserved5: [u8; <span class="number">204</span>],
     <span class="doccomment">/// NVM Subsystem NVMe Qualified Name
     ///
     /// This field contains a null-terminated UTF-8 string.
-    </span>subnqn: [u8; <span class="number">256</span>],
-    reserved6: [u8; <span class="number">768</span>],
-    ioccsz: u32_le,
-    iorcsz: u32_le,
-    icdoff: u16_le,
-    fcatt: u8,
-    msdbd: u8,
-    ofcs: u16_le,
-    reserved7: [u8; <span class="number">242</span>],
-    psd: [[u8; <span class="number">32</span>]; <span class="number">32</span>],
-    vendor_specific_data: [u8; <span class="number">1024</span>],
+    </span><span class="kw">pub </span>subnqn: [u8; <span class="number">256</span>],
+    <span class="kw">pub </span>reserved6: [u8; <span class="number">768</span>],
+    <span class="kw">pub </span>ioccsz: u32_le,
+    <span class="kw">pub </span>iorcsz: u32_le,
+    <span class="kw">pub </span>icdoff: u16_le,
+    <span class="kw">pub </span>fcatt: u8,
+    <span class="kw">pub </span>msdbd: u8,
+    <span class="kw">pub </span>ofcs: u16_le,
+    <span class="kw">pub </span>reserved7: [u8; <span class="number">242</span>],
+    <span class="kw">pub </span>psd: [[u8; <span class="number">32</span>]; <span class="number">32</span>],
+    <span class="kw">pub </span>vendor_specific_data: [u8; <span class="number">1024</span>],
 }
 
 <span class="kw">const _</span>: () = {
@@ -1027,4 +1027,4 @@
     </span><span class="kw">pub </span>lbaf: [LbaFormat; <span class="number">64</span>],
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (9aa5c24b7 2023-02-17)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (246eae2fa 2023-02-21)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
