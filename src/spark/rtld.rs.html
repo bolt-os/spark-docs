@@ -311,37 +311,6 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -376,8 +345,8 @@
     page_align_down, page_align_up, pages_for, pmm, size_of,
     vmm::{AddressSpace, MapError},
 };
-<span class="kw">use </span>core::{cell::OnceCell, cmp, mem::size_of};
-<span class="kw">use </span>elf::{DynTag, Elf, Rela, RelocKind, SegmentKind};
+<span class="kw">use </span>core::cmp;
+<span class="kw">use </span>elf::{DynTag, Elf, Rela, RelocKind, Segment, SegmentKind};
 
 <span class="attr">#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 </span><span class="kw">pub enum </span>LoadError {
@@ -387,245 +356,214 @@
     TruncatedSegment,
 }
 
-<span class="kw">pub struct </span>Rtld&lt;<span class="lifetime">&#39;elf</span>&gt; {
-    object: <span class="kw-2">&amp;</span><span class="lifetime">&#39;elf </span>elf::Elf&lt;<span class="lifetime">&#39;elf</span>&gt;,
-    <span class="kw">pub </span>link_base: usize,
-    <span class="doccomment">/// Physical address at which the object&#39;s image was loaded
-    </span><span class="kw">pub </span>image_base: usize,
-    <span class="doccomment">/// Total size of the image, in bytes
-    </span><span class="kw">pub </span>image_size: usize,
-    <span class="doccomment">/// Virtual address at which the object&#39;s image was loaded
-    </span><span class="kw">pub </span>load_base: usize,
-    <span class="doccomment">/// Relocation slide applied to the object (general relocation/KASLR)
-    ///
-    /// This value is the difference between the address at which the object was linked
-    /// and the actual address at which is was loaded (`load_base`).
-    </span><span class="kw">pub </span>reloc_base: usize,
-    relocation_table: OnceCell&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;elf </span>[Rela]&gt;&gt;,
-    has_ifuncs: bool,
+<span class="kw">pub struct </span>Rtld&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;elf</span>&gt; {
+    <span class="kw">pub </span>elf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Elf&lt;<span class="lifetime">&#39;elf</span>&gt;,
+    load_segments: Vec&lt;Segment&lt;<span class="lifetime">&#39;elf</span>, <span class="lifetime">&#39;elf</span>&gt;&gt;,
+    link_base: usize,
+    <span class="comment">// link_end: usize,
+    </span>image_size: usize,
+    <span class="kw">pub </span>image_base: usize,
+    flags: RtldFlags,
+    reloc_offset: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;elf</span>&gt; core::ops::Deref <span class="kw">for </span>Rtld&lt;<span class="lifetime">&#39;elf</span>&gt; {
-    <span class="kw">type </span>Target = elf::Elf&lt;<span class="lifetime">&#39;elf</span>&gt;;
-
-    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
-        <span class="self">self</span>.object
+<span class="macro">bitflags::bitflags! </span>{
+    <span class="kw">struct </span>RtldFlags : u32 {
+        <span class="kw">const </span>IMAGE_LOADED = <span class="number">1 </span>&lt;&lt; <span class="number">0</span>;
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;elf</span>&gt; Rtld&lt;<span class="lifetime">&#39;elf</span>&gt; {
-    <span class="kw">pub fn </span>image_as_slice(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
-        <span class="kw">unsafe </span>{ core::slice::from_raw_parts(<span class="self">self</span>.image_base <span class="kw">as </span><span class="kw-2">*const </span>u8, <span class="self">self</span>.image_size) }
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;elf</span>, <span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;elf</span>&gt; Rtld&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;elf</span>&gt; {
+    <span class="kw">pub fn </span>new(elf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Elf&lt;<span class="lifetime">&#39;elf</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Rtld&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;elf</span>&gt;, LoadError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>load_segments = <span class="macro">vec!</span>[];
+        <span class="kw">let </span><span class="kw-2">mut </span>link_base = usize::MAX;
+        <span class="kw">let </span><span class="kw-2">mut </span>link_end = usize::MIN;
+        <span class="comment">// let mut dynamic = None;
+        // let mut tls = None;
+
+        </span><span class="kw">for </span>segment <span class="kw">in </span>elf.segments() {
+            <span class="kw">match </span>segment.kind() {
+                SegmentKind::Load =&gt; {
+                    <span class="kw">let </span>base = segment.virtual_address() <span class="kw">as </span>usize;
+                    <span class="kw">let </span>end = base + segment.mem_size();
+
+                    <span class="kw">if </span>segment.mem_size() &lt; segment.file_size() {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(LoadError::TruncatedSegment);
+                    }
+
+                    link_base = cmp::min(link_base, base);
+                    link_end = cmp::max(link_end, end);
+                    load_segments.push(segment);
+                }
+                <span class="comment">// SegmentKind::Dynamic =&gt; {
+                //     assert!(dynamic.is_none());
+                //     dynamic = Some(segment);
+                // }
+                // SegmentKind::Tls =&gt; {
+                //     assert!(tls.is_none());
+                //     tls = Some(segment);
+                // }
+                </span><span class="kw">_ </span>=&gt; <span class="kw">continue</span>,
+            }
+        }
+
+        <span class="kw">if </span>load_segments.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(LoadError::NoSegments);
+        }
+
+        <span class="kw">let </span>image_size = link_end - link_base;
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            elf,
+            load_segments,
+            link_base,
+            image_size,
+            image_base: <span class="number">0</span>,
+            reloc_offset: <span class="number">0</span>,
+            flags: RtldFlags::empty(),
+        })
     }
 
-    <span class="kw">fn </span>reloc_addr(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: usize) -&gt; usize {
-        <span class="self">self</span>.reloc_base.wrapping_add(addr)
+    <span class="kw">pub fn </span>set_relocation_offset(<span class="kw-2">&amp;mut </span><span class="self">self</span>, offset: usize) {
+        <span class="macro">assert!</span>(
+            !<span class="self">self</span>.flags.contains(RtldFlags::IMAGE_LOADED),
+            <span class="string">&quot;the relocation offset cannot be changed once the image has been loaded&quot;
+        </span>);
+        <span class="self">self</span>.reloc_offset = offset;
     }
 
-    <span class="kw">fn </span>reloc_addr_signed(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: isize) -&gt; usize {
-        <span class="self">self</span>.reloc_base.wrapping_add_signed(addr)
-    }
-
-    <span class="kw">pub fn </span>check_image_ptr&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ptr: <span class="kw-2">*const </span>T) -&gt; bool {
+    <span class="kw">pub fn </span>check_ptr&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ptr: <span class="kw-2">*const </span>T) -&gt; bool {
         <span class="kw">let </span>obj_start = ptr.addr();
-        <span class="kw">let </span>obj_end = obj_start + size_of::&lt;T&gt;();
+        <span class="kw">let </span>obj_end = obj_start + <span class="macro">size_of!</span>(T);
         <span class="kw">let </span>img_start = <span class="self">self</span>.image_base;
         <span class="kw">let </span>img_end = img_start + <span class="self">self</span>.image_size;
 
         img_start &lt;= obj_start &amp;&amp; obj_end &lt;= img_end
     }
 
-    <span class="kw">pub fn </span>entry_point(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.reloc_addr(<span class="self">self</span>.object.entry_point() <span class="kw">as _</span>)
+    <span class="kw">pub fn </span>reloc(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: usize) -&gt; usize {
+        <span class="self">self</span>.reloc_offset.wrapping_add(addr)
+    }
+
+    <span class="kw">pub fn </span>reloc_signed(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: isize) -&gt; usize {
+        <span class="self">self</span>.reloc_offset.wrapping_add_signed(addr)
+    }
+
+    <span class="kw">pub fn </span>map_image(<span class="kw-2">&amp;mut </span><span class="self">self</span>, vmspace: <span class="kw-2">&amp;mut </span>AddressSpace) -&gt; <span class="prelude-ty">Result</span>&lt;(), LoadError&gt; {
+        <span class="macro">assert!</span>(<span class="self">self</span>.flags.contains(RtldFlags::IMAGE_LOADED));
+        <span class="self">self</span>.flags |= RtldFlags::IMAGE_LOADED;
+
+        <span class="kw">for </span>segment <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.load_segments {
+            <span class="kw">let </span>virt = segment.virtual_address() <span class="kw">as </span>usize;
+            <span class="kw">let </span>phys = <span class="self">self</span>.image_base + (virt - <span class="self">self</span>.link_base);
+            <span class="kw">let </span>virt_p = <span class="macro">page_align_down!</span>(virt);
+            <span class="kw">let </span>phys_p = <span class="macro">page_align_down!</span>(phys);
+
+            <span class="kw">if </span>virt &lt; vmspace.higher_half_start() {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(LoadError::LowerHalfSegment);
+            }
+
+            vmspace
+                .map_pages(
+                    virt_p,
+                    phys_p,
+                    <span class="macro">page_align_up!</span>(virt + segment.mem_size()) - virt_p,
+                    segment.flags().into(),
+                )
+                .map_err(|err| <span class="kw">match </span>err {
+                    MapError::OverlappingMappings =&gt; LoadError::OverlappingSegments,
+                    MapError::InvalidFlags =&gt; <span class="macro">panic!</span>(<span class="string">&quot;this shouldn&#39;t happen&quot;</span>),
+                    MapError::MisalignedAddr =&gt; <span class="macro">unreachable!</span>(), <span class="comment">/* they damn well better be aligned */
+                </span>})
+                .unwrap();
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">pub fn </span>load_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="macro">assert!</span>(<span class="self">self</span>.flags.contains(RtldFlags::IMAGE_LOADED));
+        <span class="self">self</span>.reloc(<span class="self">self</span>.link_base)
+    }
+
+    <span class="kw">pub fn </span>load_image(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="macro">assert!</span>(!<span class="self">self</span>.flags.contains(RtldFlags::IMAGE_LOADED));
+        <span class="self">self</span>.flags |= RtldFlags::IMAGE_LOADED;
+
+        <span class="self">self</span>.image_base = pmm::alloc_frames(<span class="macro">pages_for!</span>(<span class="self">self</span>.image_size)).unwrap();
+
+        <span class="kw">for </span>segment <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.load_segments {
+            <span class="kw">let </span>virt = segment.virtual_address() <span class="kw">as </span>usize;
+            <span class="kw">let </span>phys = <span class="self">self</span>.image_base + (virt - <span class="self">self</span>.link_base);
+
+            <span class="kw">unsafe </span>{
+                core::ptr::copy_nonoverlapping(
+                    segment.file_data().as_ptr(),
+                    phys <span class="kw">as </span><span class="kw-2">*mut </span>u8,
+                    segment.file_size(),
+                );
+                core::ptr::write_bytes(
+                    (phys + segment.file_size()) <span class="kw">as </span><span class="kw-2">*mut </span>u8,
+                    <span class="number">0</span>,
+                    segment.mem_size() - segment.file_size(),
+                );
+            }
+        }
+    }
+
+    <span class="doccomment">/// Convert a virtual address within the object to a physical address
+    ///
+    /// This is required for the Limine protocol to access the requests before we know
+    /// the paging mode that will be used.
+    </span><span class="kw">pub fn </span>to_image_ptr(<span class="kw-2">&amp;</span><span class="self">self</span>, addr: usize) -&gt; usize {
+        <span class="macro">assert!</span>(<span class="self">self</span>.flags.contains(RtldFlags::IMAGE_LOADED));
+        <span class="kw">let </span>x = <span class="self">self</span>.image_base + (addr - <span class="self">self</span>.link_base);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;{addr:#018x} -&gt; {x:#018x}&quot;</span>);
+        x
     }
 
     <span class="kw">pub fn </span>relocation_table(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;elf </span>[Rela]&gt; {
-        <span class="kw-2">*</span><span class="self">self</span>.relocation_table.get_or_init(|| {
-            <span class="self">self</span>.object.dynamic_table().and_then(|dyntab| {
-                <span class="kw">let </span><span class="kw-2">mut </span>addr = <span class="prelude-val">None</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="prelude-val">None</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="prelude-val">None</span>;
+        <span class="self">self</span>.elf.dynamic_table().and_then(|dyntab| {
+            <span class="kw">let </span><span class="kw-2">mut </span>addr = <span class="prelude-val">None</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="prelude-val">None</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="prelude-val">None</span>;
 
-                <span class="kw">for </span>entry <span class="kw">in </span>dyntab.table_raw() {
-                    <span class="kw">match </span>entry.tag() {
-                        DynTag::Rela =&gt; addr = <span class="prelude-val">Some</span>(entry.value()),
-                        DynTag::RelaSize =&gt; size = <span class="prelude-val">Some</span>(entry.value()),
-                        DynTag::RelaCount =&gt; count = <span class="prelude-val">Some</span>(entry.value()),
-                        DynTag::RelaEnt =&gt; <span class="macro">assert_eq!</span>(entry.value(), <span class="macro">size_of!</span>(Rela)),
-                        <span class="kw">_ </span>=&gt; {}
-                    }
+            <span class="kw">for </span>entry <span class="kw">in </span>dyntab.table_raw() {
+                <span class="kw">match </span>entry.tag() {
+                    DynTag::Rela =&gt; addr = <span class="prelude-val">Some</span>(entry.value()),
+                    DynTag::RelaSize =&gt; size = <span class="prelude-val">Some</span>(entry.value()),
+                    DynTag::RelaCount =&gt; count = <span class="prelude-val">Some</span>(entry.value()),
+                    DynTag::RelaEnt =&gt; <span class="macro">assert_eq!</span>(entry.value(), <span class="macro">size_of!</span>(Rela)),
+                    <span class="kw">_ </span>=&gt; {}
                 }
+            }
 
-                <span class="kw">let </span>addr = <span class="self">self</span>.image_base + (addr<span class="question-mark">? </span>- <span class="self">self</span>.link_base);
-                <span class="kw">let </span>len = size<span class="question-mark">? </span>/ <span class="macro">size_of!</span>(Rela);
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(count) = count {
-                    <span class="macro">assert_eq!</span>(len, count);
-                }
+            <span class="kw">let </span>addr = <span class="self">self</span>.image_base + (addr<span class="question-mark">? </span>- <span class="self">self</span>.link_base);
+            <span class="kw">let </span>len = size<span class="question-mark">? </span>/ <span class="macro">size_of!</span>(Rela);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(count) = count {
+                <span class="macro">assert_eq!</span>(len, count);
+            }
 
-                <span class="kw">unsafe </span>{ <span class="prelude-val">Some</span>(core::slice::from_raw_parts(addr <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>, len)) }
-            })
+            <span class="kw">unsafe </span>{ <span class="prelude-val">Some</span>(core::slice::from_raw_parts(addr <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>, len)) }
         })
     }
 
-    <span class="kw">pub fn </span>is_relocatable(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.object.file_type() == elf::ElfType::Dyn
-    }
+    <span class="kw">pub fn </span>do_relocations(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(relocation_table) = <span class="self">self</span>.relocation_table() <span class="kw">else </span>{ <span class="kw">return </span>};
 
-    <span class="kw">pub fn </span>allocate_tls(<span class="kw-2">&amp;</span><span class="self">self</span>, _hartid: usize, vmspace: <span class="kw-2">&amp;mut </span>AddressSpace) -&gt; usize {
-        <span class="kw">let </span><span class="prelude-val">Some</span>(sgmt) = <span class="self">self</span>.segments().find(|sgmt| sgmt.kind() == SegmentKind::Tls) <span class="kw">else </span>{ <span class="kw">return </span><span class="number">0 </span>};
+        <span class="kw">for </span>reloc_entry <span class="kw">in </span>relocation_table {
+            <span class="kw">let </span>location = <span class="self">self</span>.reloc(reloc_entry.offset <span class="kw">as </span>usize);
 
-        <span class="kw">let </span>tls_image = <span class="kw">unsafe </span>{
-            <span class="kw">let </span>ptr = (vmspace.higher_half_start() <span class="kw">as </span><span class="kw-2">*mut </span>u8)
-                .add(pmm::alloc_frames(<span class="macro">pages_for!</span>(sgmt.mem_size())).unwrap());
-            core::slice::from_raw_parts_mut(ptr, sgmt.mem_size())
-        };
-
-        tls_image[..sgmt.file_size()].copy_from_slice(sgmt.file_data());
-        tls_image[sgmt.file_size()..].fill(<span class="number">0</span>);
-
-        tls_image.as_ptr().addr()
-    }
-}
-
-<span class="doccomment">/// Load an ELF executable into a virtual address space
-///
-/// This function loads the ELF executable `elf` into the virtual address space specified
-/// by `vmspace`. If present, all relocations will be resolved and the Thread Local Storage
-/// image will be initialized.
-</span><span class="kw">pub fn </span>load_object&lt;<span class="lifetime">&#39;elf</span>&gt;(
-    elf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;elf </span>Elf,
-    vmspace: <span class="kw-2">&amp;mut </span>AddressSpace,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Rtld&lt;<span class="lifetime">&#39;elf</span>&gt;, LoadError&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>load_headers = <span class="macro">vec!</span>[];
-    <span class="kw">let </span><span class="kw-2">mut </span>link_base = usize::MAX;
-    <span class="kw">let </span><span class="kw-2">mut </span>link_end = usize::MIN;
-
-    <span class="kw">for </span>sgmt <span class="kw">in </span>elf
-        .segments()
-        .filter(|sgmt| sgmt.kind() == SegmentKind::Load)
-    {
-        <span class="kw">let </span>sgmt_start = sgmt.virtual_address() <span class="kw">as </span>usize;
-        <span class="kw">let </span>sgmt_end = sgmt.virtual_address() <span class="kw">as </span>usize + sgmt.mem_size();
-
-        <span class="kw">if </span>sgmt_start &lt; vmspace.higher_half_start() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(LoadError::LowerHalfSegment);
-        }
-
-        <span class="kw">if </span>sgmt.file_size() &gt; sgmt.mem_size() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(LoadError::TruncatedSegment);
-        }
-
-        link_base = cmp::min(link_base, sgmt_start);
-        link_end = cmp::max(link_end, sgmt_end);
-
-        load_headers.push(sgmt);
-    }
-
-    <span class="kw">if </span>load_headers.is_empty() {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(LoadError::NoSegments);
-    }
-
-    <span class="comment">// Now that we know where the object linked to and how big it is, we can allocate
-    // memory for the image and decide whether or not to relocate it.
-
-    </span><span class="kw">let </span>image_size = link_end - link_base;
-    <span class="kw">let </span>image_base = pmm::alloc_frames(<span class="macro">pages_for!</span>(image_size)).unwrap();
-
-    <span class="comment">// `load_base` is where the object actually gets loaded,
-    // KASLR would make this different from `link_base`.
-    </span><span class="kw">let </span>load_base = link_base;
-
-    <span class="comment">// `reloc_base` is the difference between them, used for relocations.
-    </span><span class="kw">let </span>reloc_base = load_base.wrapping_sub(link_base);
-
-    <span class="comment">// Copy each Load segment&#39;s data into the allocated image.
-    </span><span class="kw">for </span>sgmt <span class="kw">in </span>load_headers {
-        <span class="kw">let </span>virt_addr = reloc_base.wrapping_add(sgmt.virtual_address() <span class="kw">as </span>usize);
-        <span class="kw">let </span>phys_addr = image_base + (virt_addr - load_base);
-        <span class="kw">let </span>virt_page = <span class="macro">page_align_down!</span>(virt_addr);
-        <span class="kw">let </span>phys_page = <span class="macro">page_align_down!</span>(phys_addr);
-
-        <span class="kw">unsafe </span>{
-            <span class="kw">let </span>sgmt_data = core::slice::from_raw_parts_mut(phys_addr <span class="kw">as </span><span class="kw-2">*mut </span>u8, sgmt.mem_size());
-
-            sgmt_data[..sgmt.file_size()].copy_from_slice(sgmt.file_data());
-            sgmt_data[sgmt.file_size()..].fill(<span class="number">0</span>);
-        }
-
-        vmspace
-            .map_pages(
-                virt_page,
-                phys_page,
-                <span class="macro">page_align_up!</span>(virt_addr + sgmt.mem_size()) - virt_page,
-                sgmt.flags().into(),
-            )
-            .map_err(|err| <span class="kw">match </span>err {
-                MapError::OverlappingMappings =&gt; LoadError::OverlappingSegments,
-                MapError::InvalidFlags =&gt; <span class="macro">panic!</span>(<span class="string">&quot;this shouldn&#39;t happen&quot;</span>),
-                MapError::MisalignedAddr =&gt; <span class="macro">unreachable!</span>(), <span class="comment">/* they damn well better be aligned */
-            </span>})<span class="question-mark">?</span>;
-    }
-
-    <span class="kw">let </span><span class="kw-2">mut </span>rtld_object = Rtld {
-        object: elf,
-        load_base,
-        reloc_base,
-        link_base,
-        image_base,
-        image_size,
-        relocation_table: OnceCell::new(),
-        has_ifuncs: <span class="bool-val">false</span>,
-    };
-
-    <span class="kw">if </span>rtld_object.is_relocatable() {
-        resolve_relocations(<span class="kw-2">&amp;mut </span>rtld_object);
-    }
-
-    <span class="kw">if </span>rtld_object.has_ifuncs {
-        resolve_ifuncs(<span class="kw-2">&amp;mut </span>rtld_object);
-    }
-
-    <span class="prelude-val">Ok</span>(rtld_object)
-}
-
-<span class="kw">fn </span>resolve_relocations(object: <span class="kw-2">&amp;mut </span>Rtld) {
-    <span class="kw">let </span><span class="prelude-val">Some</span>(relocation_table) = object.relocation_table() <span class="kw">else </span>{ <span class="kw">return </span>};
-
-    <span class="kw">for </span>reloc_entry <span class="kw">in </span>relocation_table {
-        <span class="kw">let </span>location = object.reloc_addr(reloc_entry.offset <span class="kw">as </span>usize);
-
-        <span class="kw">match </span>reloc_entry.kind() {
-            RelocKind::RISCV_NONE =&gt; {}
-            RelocKind::RISCV_RELATIVE =&gt; {
-                <span class="kw">let </span>value = object.reloc_addr_signed(reloc_entry.addend <span class="kw">as </span>isize);
-                <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(location <span class="kw">as </span><span class="kw-2">*mut </span>usize) = value };
+            <span class="kw">match </span>reloc_entry.kind() {
+                RelocKind::RISCV_NONE =&gt; {}
+                RelocKind::RISCV_RELATIVE =&gt; {
+                    <span class="kw">let </span>value = <span class="self">self</span>.reloc_signed(reloc_entry.addend <span class="kw">as </span>isize);
+                    <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(location <span class="kw">as </span><span class="kw-2">*mut </span>usize) = value };
+                }
+                <span class="comment">// RelocKind::RISCV_IRELATIVE =&gt; object.has_ifuncs = true,
+                </span><span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
             }
-            RelocKind::RISCV_IRELATIVE =&gt; object.has_ifuncs = <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
         }
-    }
-}
-
-<span class="kw">type </span>IfuncResolver = <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>() -&gt; usize;
-
-<span class="doccomment">/// Resolve indirect function relocations
-///
-/// Relocating indirect functions is similar to normal relative relocations, except the
-/// computed address instead points to a function in the loaded binary which will return
-/// the actual address for the relocation.
-///
-/// Because the relocation is resolved by the object itself, all other relocations must
-/// be resolved before these are.
-</span><span class="kw">fn </span>resolve_ifuncs(object: <span class="kw-2">&amp;mut </span>Rtld) {
-    <span class="kw">let </span><span class="prelude-val">Some</span>(relocation_table) = object.relocation_table() <span class="kw">else </span>{ <span class="kw">return </span>};
-
-    <span class="kw">for </span>reloc_entry <span class="kw">in </span>relocation_table
-        .iter()
-        .filter(|r| r.kind() == RelocKind::RISCV_IRELATIVE)
-    {
-        <span class="kw">let </span>location = object.reloc_addr(reloc_entry.offset <span class="kw">as </span>usize) <span class="kw">as </span><span class="kw-2">*mut </span>usize;
-        <span class="kw">let </span>resolv = object.reloc_addr_signed(reloc_entry.addend <span class="kw">as </span>isize) <span class="kw">as </span><span class="kw-2">*const </span>IfuncResolver;
-        <span class="kw">unsafe </span>{ <span class="kw-2">*</span>location = (<span class="kw-2">*</span>resolv)() };
     }
 }
 
@@ -687,4 +625,4 @@
     RELOC_OK
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (34e6673a0 2023-02-25)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (d962ea578 2023-02-26)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

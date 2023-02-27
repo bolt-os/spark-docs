@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["RELOC_ERROR","RELOC_OK"],"enum":["LoadError"],"fn":["_relocate","load_object","resolve_ifuncs","resolve_relocations"],"struct":["Rtld"],"type":["IfuncResolver"]};
+window.SIDEBAR_ITEMS = {"constant":["RELOC_ERROR","RELOC_OK"],"enum":["LoadError"],"fn":["_relocate"],"struct":["Rtld","RtldFlags"],"trait":["__BitFlags"]};

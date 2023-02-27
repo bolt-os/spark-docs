@@ -53,6 +53,12 @@
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -83,13 +89,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-</span><span class="kw">use </span>core::cell::SyncUnsafeCell;
+</span><span class="kw">use </span>core::{cell::SyncUnsafeCell, sync::atomic::Ordering};
 
 <span class="kw">use </span>::fdt <span class="kw">as </span>libfdt;
 
+<span class="kw">use </span><span class="kw">crate</span>::BOOT_HART_ID;
+
 <span class="kw">static </span>FDT: SyncUnsafeCell&lt;<span class="prelude-ty">Option</span>&lt;libfdt::Fdt&gt;&gt; = SyncUnsafeCell::new(<span class="prelude-val">None</span>);
 
-<span class="kw">pub fn </span>init(hartid: usize, dtb_ptr: <span class="kw-2">*mut </span>u8) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>libfdt::Fdt&lt;<span class="lifetime">&#39;static</span>&gt; {
+<span class="kw">pub fn </span>init(dtb_ptr: <span class="kw-2">*mut </span>u8) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>libfdt::Fdt&lt;<span class="lifetime">&#39;static</span>&gt; {
     <span class="comment">// &quot;Install&quot; the FDT.
     // The reference returned here has a &#39;static lifetime.
     </span><span class="kw">let </span>fdt = <span class="kw">unsafe </span>{
@@ -100,7 +108,7 @@
 
     <span class="kw">let </span>bsp_node = fdt
         .cpus()
-        .find(|node| node.ids().first() == hartid)
+        .find(|node| node.ids().first() == BOOT_HART_ID.load(Ordering::Relaxed))
         .expect(<span class="string">&quot;no matching /cpus node for the boot hart&quot;</span>);
 
     <span class="kw">let </span>timebase_freq = bsp_node.timebase_frequency();
@@ -108,5 +116,9 @@
 
     fdt
 }
+
+<span class="kw">pub fn </span>get_fdt() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>libfdt::Fdt&lt;<span class="lifetime">&#39;static</span>&gt; {
+    <span class="kw">unsafe </span>{ (<span class="kw-2">*</span>FDT.get()).as_ref().unwrap() }
+}
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (34e6673a0 2023-02-25)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (d962ea578 2023-02-26)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

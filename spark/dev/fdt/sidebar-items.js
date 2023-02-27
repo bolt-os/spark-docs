@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["init"],"static":["FDT"]};
+window.SIDEBAR_ITEMS = {"fn":["get_fdt","init"],"static":["FDT"]};

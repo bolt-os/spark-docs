@@ -475,13 +475,6 @@
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
 <a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -512,7 +505,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-</span><span class="kw">use crate</span>::{pages_for, pmm, pmm::MAX_PHYS_ADDR};
+</span><span class="kw">use crate</span>::{dev::fdt, pages_for, pmm, pmm::MAX_PHYS_ADDR, BOOT_HART_ID};
 <span class="kw">use </span>alloc::collections::LinkedList;
 <span class="kw">use </span>core::{cmp, ptr, sync::atomic::Ordering};
 
@@ -904,29 +897,15 @@
     }
 }
 
-<span class="kw">pub fn </span>init(vmspace: <span class="kw-2">&amp;mut </span>AddressSpace) {
-    <span class="kw">let </span>pmap_size = cmp::max(<span class="number">0x100000000</span>, MAX_PHYS_ADDR.load(Ordering::Relaxed) + <span class="number">1</span>);
-    <span class="kw">let </span>hhdm_base = vmspace.paging_mode().higher_half_start();
-
-    <span class="macro">println!</span>(<span class="string">&quot;Initializing {:?} paging.&quot;</span>, vmspace.paging_mode());
-
-    vmspace
-        .map_pages(<span class="number">0</span>, <span class="number">0</span>, pmap_size, MapFlags::RWX)
-        .expect(<span class="string">&quot;failed to create identity map&quot;</span>);
-    vmspace
-        .map_pages(hhdm_base, <span class="number">0</span>, pmap_size, MapFlags::RWX)
-        .expect(<span class="string">&quot;failed to create higher-half map&quot;</span>);
-
-    <span class="kw">unsafe </span>{ vmspace.switch_to() };
-}
-
 <span class="doccomment">/// Initialize virtual memory from the information in the FDT
 ///
 /// # Panics
 ///
 /// This function will panic if the initial mappings (identity map and HHDM) cannot be created.
 /// It also panics if a paging mode cannot be determined, however this really should be an error.
-</span><span class="kw">pub fn </span>init_from_fdt(fdt: <span class="kw-2">&amp;</span>fdt::Fdt, hartid: usize) -&gt; AddressSpace {
+</span><span class="kw">pub fn </span>init_from_fdt(want_5lvl_paging: bool) -&gt; AddressSpace {
+    <span class="kw">let </span>fdt = fdt::get_fdt();
+    <span class="kw">let </span>hartid = BOOT_HART_ID.load(Ordering::Relaxed);
     <span class="comment">/*
      * Determine the paging mode supported by the BSP, we assumme the
      * other cores we&#39;re interested in will support the same.
@@ -944,7 +923,14 @@
         .expect(<span class="string">&quot;BSP has no `mmu-type` property&quot;</span>)
     {
         <span class="string">&quot;riscv,sv39&quot; </span>=&gt; PagingMode::Sv39,
-        <span class="string">&quot;riscv,sv48&quot; </span>| <span class="string">&quot;riscv,sv57&quot; </span>=&gt; PagingMode::Sv48,
+        <span class="string">&quot;riscv,sv48&quot; </span>=&gt; PagingMode::Sv48,
+        <span class="string">&quot;riscv,sv57&quot; </span>=&gt; {
+            <span class="kw">if </span>want_5lvl_paging {
+                PagingMode::Sv57
+            } <span class="kw">else </span>{
+                PagingMode::Sv48
+            }
+        }
         <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unknown mmu-type&quot;</span>),
     };
 
@@ -967,4 +953,4 @@
     vmspace
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (34e6673a0 2023-02-25)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (d962ea578 2023-02-26)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

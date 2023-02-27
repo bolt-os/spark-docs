@@ -263,6 +263,21 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -303,6 +318,7 @@
     </span>get_mut_unchecked,                  <span class="comment">// https://github.com/rust-lang/rust/issues/63292
     </span>let_chains,                         <span class="comment">// https://github.com/rust-lang/rust/issues/53667
     </span>naked_functions,                    <span class="comment">// https://github.com/rust-lang/rust/issues/32408
+    </span>never_type,                         <span class="comment">// https://github.com/rust-lang/rust/issues/35121
     </span>new_uninit,                         <span class="comment">// https://github.com/rust-lang/rust/issues/63291
     </span>once_cell,                          <span class="comment">// https://github.com/rust-lang/rust/issues/74465
     </span>pointer_byte_offsets,               <span class="comment">// https://github.com/rust-lang/rust/issues/96283
@@ -352,6 +368,7 @@
     };
 }
 
+<span class="kw">mod </span>config;
 <span class="kw">mod </span>dev;
 <span class="kw">mod </span>fs;
 <span class="kw">mod </span>io;
@@ -367,7 +384,8 @@
 <span class="kw">pub use </span>anyhow::Result;
 <span class="kw">pub use </span>mem::{pmm, vmm};
 
-<span class="kw">use </span>core::{ptr, sync::atomic::AtomicPtr};
+<span class="kw">use </span><span class="kw">crate</span>::config::Value;
+<span class="kw">use </span>core::sync::atomic::{AtomicUsize, Ordering};
 
 <span class="macro">global_asm!</span>(<span class="macro">include_str!</span>(<span class="string">&quot;locore.s&quot;</span>), options(raw));
 
@@ -378,7 +396,7 @@
     }
 }
 
-<span class="kw">static </span>DTB_PTR: AtomicPtr&lt;u8&gt; = AtomicPtr::new(ptr::null_mut());
+<span class="kw">static </span>BOOT_HART_ID: AtomicUsize = AtomicUsize::new(<span class="number">0</span>);
 
 <span class="kw">static </span>SPARK_CFG_PATHS: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[<span class="string">&quot;/boot/spark.cfg&quot;</span>, <span class="string">&quot;/spark.cfg&quot;</span>];
 
@@ -389,8 +407,10 @@
     //  TODO: Use legacy SBI console until we probe for consoles.
     </span>io::init();
 
+    BOOT_HART_ID.store(hartid, Ordering::Relaxed);
+
     <span class="comment">// Install the Device Tree
-    </span><span class="kw">let </span>fdt = dev::fdt::init(hartid, dtb_ptr);
+    </span><span class="kw">let </span>fdt = dev::fdt::init(dtb_ptr);
 
     <span class="comment">// TODO: the platform stuff in `fdt::init()` should be pulled out
 
@@ -437,12 +457,22 @@
     };
 
     <span class="kw">let </span>boot_config_data = config_file.read_to_end().unwrap();
-    <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, core::str::from_utf8(<span class="kw-2">&amp;</span>boot_config_data).unwrap());
+    <span class="kw">let </span>boot_config = config::parse_config_file(<span class="kw-2">&amp;</span>boot_config_data);
+
+    <span class="kw">let </span>boot_entry = boot_config.entries.first().expect(<span class="string">&quot;no boot entry&quot;</span>);
+    <span class="kw">match </span>boot_entry.param(<span class="string">&quot;protocol&quot;</span>) {
+        <span class="prelude-val">Some</span>(Value::String(proto)) =&gt; {
+            <span class="kw">if </span><span class="kw-2">*</span>proto != <span class="string">&quot;limine&quot; </span>{
+                <span class="macro">todo!</span>(<span class="string">&quot;limine or bust!!&quot;</span>);
+            }
+        }
+        <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;`protocol` parameter is not a string&quot;</span>),
+    }
 
     <span class="comment">// TODO: Parse bootloader config and find boot entry
     //  Eventually, this is where we&#39;d start an interactive console.
 
-    </span><span class="macro">todo!</span>(<span class="string">&quot;lol&quot;</span>);
+    </span>proto::limine::main(config_file, boot_entry).unwrap();
 }
 
 <span class="attr">#[allow(dead_code)]
@@ -529,4 +559,4 @@
     print_fdt_node(<span class="kw-2">&amp;</span>root, <span class="kw-2">&amp;mut </span>depth);
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (34e6673a0 2023-02-25)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (d962ea578 2023-02-26)" data-search-js="search-14421e1532aead08.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
