@@ -11,7 +11,7 @@ var sourcesIndex = JSON.parse('{\
 "log":["",[],["lib.rs","macros.rs"]],\
 "rustc_demangle":["",[],["legacy.rs","lib.rs","v0.rs"]],\
 "scopeguard":["",[],["lib.rs"]],\
-"spark":["",[["dev",[["block",[["ahci",[["hba",[],["mod.rs"]]],["mod.rs"]],["nvme",[],["controller.rs","identify.rs","mod.rs","queue.rs"]]],["mod.rs"]]],["fdt.rs","fw_cfg.rs","mod.rs","pcie.rs"]],["fs",[["fat",[],["bpb.rs","dir.rs","mod.rs"]]],["mod.rs"]],["mem",[],["mod.rs","pmm.rs","vmm.rs"]],["proto",[],["limine.rs"]]],["config.rs","io.rs","main.rs","malloc.rs","panic.rs","proto.rs","rtld.rs","time.rs","trap.rs"]],\
+"spark":["",[["dev",[["block",[["ahci",[["hba",[],["mod.rs"]]],["mod.rs"]],["nvme",[],["controller.rs","identify.rs","mod.rs","queue.rs"]]],["mod.rs"]]],["fdt.rs","fw_cfg.rs","mod.rs","pcie.rs"]],["fs",[["fat",[],["bpb.rs","dir.rs","mod.rs"]]],["mod.rs"]],["mem",[],["mod.rs","pmm.rs","vmm.rs"]],["proto",[],["bootelf.rs","limine.rs"]]],["config.rs","io.rs","main.rs","malloc.rs","panic.rs","proto.rs","rtld.rs","time.rs","trap.rs"]],\
 "spin":["",[["mutex",[],["spin.rs"]]],["barrier.rs","lazy.rs","lib.rs","mutex.rs","once.rs","relax.rs","rwlock.rs"]],\
 "unwinding":["",[["unwinder",[["arch",[],["mod.rs","riscv64.rs"]],["find_fde",[],["fixed.rs","mod.rs"]]],["frame.rs","mod.rs"]]],["abi.rs","arch.rs","lib.rs","panic.rs","panicking.rs","personality.rs","util.rs"]],\
 "uuid":["",[],["builder.rs","error.rs","external.rs","fmt.rs","lib.rs","macros.rs","parser.rs","timestamp.rs"]]\

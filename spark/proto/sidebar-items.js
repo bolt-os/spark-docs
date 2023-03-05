@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["limine"]};
+window.SIDEBAR_ITEMS = {"mod":["bootelf","limine"]};
