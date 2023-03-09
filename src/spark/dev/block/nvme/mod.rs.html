@@ -260,6 +260,29 @@
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
 </pre><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -297,7 +320,7 @@
         block::{<span class="self">self</span>, BlockIo},
         pcie, DeviceDriver,
     },
-    io,
+    io, page_align_up,
     vmm::PAGE_SIZE,
 };
 <span class="kw">use </span>alloc::sync::Arc;
@@ -378,7 +401,7 @@
         <span class="kw">let </span>lba_format = ns_info.lbaf[ns_info.flbas <span class="kw">as </span>usize];
         <span class="kw">if </span>lba_format.metadata_size() != <span class="number">0 </span>{
             <span class="macro">log::warn!</span>(
-                <span class="string">&quot;skipping namespace #{nsid} with metdata size {}&quot;</span>,
+                <span class="string">&quot;skipping namespace #{nsid} with metadata size {}&quot;</span>,
                 lba_format.metadata_size()
             );
             <span class="kw">continue</span>;
@@ -412,38 +435,63 @@
     max_tx_blocks: u64,
 }
 
-<span class="kw">struct </span>PrpList {
-    lists: Vec&lt;[u64; <span class="number">512</span>]&gt;,
+<span class="kw">struct </span>ChainedPrpLists {
+    lists: Vec&lt;Box&lt;PrpList&gt;&gt;,
+}
+
+<span class="attr">#[repr(align(<span class="number">4096</span>))]
+</span><span class="kw">struct </span>PrpList {
+    prps: [u64; <span class="number">512</span>],
     count: usize,
 }
 
 <span class="kw">impl </span>PrpList {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            lists: <span class="macro">vec!</span>[],
-            count: <span class="number">0</span>,
+    <span class="kw">fn </span>new(addr: u64) -&gt; Box&lt;<span class="self">Self</span>&gt; {
+        Box::new(<span class="self">Self </span>{
+            prps: {
+                <span class="kw">let </span><span class="kw-2">mut </span>prps = [<span class="number">0</span>; <span class="number">512</span>];
+                prps[<span class="number">0</span>] = addr;
+                prps
+            },
+            count: <span class="number">1</span>,
+        })
+    }
+
+    <span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr: u64) -&gt; <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="self">Self</span>&gt;&gt; {
+        <span class="kw">match </span><span class="self">self</span>.count {
+            index @ ..=<span class="number">510 </span>=&gt; {
+                <span class="self">self</span>.prps[index] = addr;
+                <span class="self">self</span>.count += <span class="number">1</span>;
+                <span class="prelude-val">None
+            </span>}
+            index @ <span class="number">511 </span>=&gt; {
+                <span class="kw">let </span>new_list = <span class="self">Self</span>::new(addr);
+                <span class="self">self</span>.prps[index] = new_list.prps.as_ptr().addr() <span class="kw">as </span>u64;
+                <span class="self">self</span>.count += <span class="number">1</span>;
+                <span class="prelude-val">Some</span>(new_list)
+            }
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
         }
+    }
+}
+
+<span class="kw">impl </span>ChainedPrpLists {
+    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ lists: <span class="macro">vec!</span>[] }
     }
 
     <span class="kw">fn </span>addr(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.lists[<span class="number">0</span>].as_ptr().addr()
+        <span class="self">self</span>.lists[<span class="number">0</span>].prps.as_ptr().addr()
     }
 
     <span class="kw">fn </span>push_addr(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr: u64) {
-        <span class="kw">let </span>block = <span class="self">self</span>.count / <span class="number">512</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>index = <span class="self">self</span>.count % <span class="number">512</span>;
-        <span class="kw">if </span>index == <span class="number">0 </span>{
-            <span class="comment">// need new block
-            </span><span class="self">self</span>.lists.push([<span class="number">0</span>; <span class="number">512</span>]);
-            <span class="kw">if </span><span class="self">self</span>.lists.len() &gt; <span class="number">1 </span>{
-                <span class="self">self</span>.lists[block][index] = <span class="self">self</span>.lists[block - <span class="number">1</span>][<span class="number">511</span>];
-                <span class="self">self</span>.lists[block - <span class="number">1</span>][<span class="number">511</span>] = <span class="self">self</span>.lists[block].as_ptr().addr() <span class="kw">as </span>u64;
-                index += <span class="number">1</span>;
-                <span class="self">self</span>.count += <span class="number">1</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(list) = <span class="self">self</span>.lists.last_mut() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(new_list) = list.push(addr) {
+                <span class="self">self</span>.lists.push(new_list);
             }
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.lists.push(PrpList::new(addr));
         }
-        <span class="self">self</span>.lists[block][index] = addr;
-        <span class="self">self</span>.count += <span class="number">1</span>;
     }
 }
 
@@ -478,12 +526,11 @@
             <span class="kw">let </span>_list = <span class="kw">if </span>align_space &lt; r_len {
                 <span class="comment">// The transfer crosses at least 1 page boundary
                 </span><span class="kw">let </span>start = buf_ptr.addr() + align_space;
-
-                <span class="kw">let </span>remaning_len = r_len - align_space;
-                <span class="kw">if </span>remaning_len &gt; PAGE_SIZE {
-                    <span class="comment">// The tranfer crosses &gt;= 2 pages, a PRP List is needed.
-                    </span><span class="kw">let </span>num_prps = remaning_len / PAGE_SIZE;
-                    <span class="kw">let </span><span class="kw-2">mut </span>prp_list = PrpList::new();
+                <span class="kw">let </span>remaining_len = r_len - align_space;
+                <span class="kw">if </span>remaining_len &gt; PAGE_SIZE {
+                    <span class="comment">// The transfer crosses &gt;= 2 pages, a PRP List is needed.
+                    </span><span class="kw">let </span>num_prps = <span class="macro">page_align_up!</span>(remaining_len) / PAGE_SIZE;
+                    <span class="kw">let </span><span class="kw-2">mut </span>prp_list = ChainedPrpLists::new();
                     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num_prps {
                         prp_list.push_addr((start + i * PAGE_SIZE) <span class="kw">as </span>u64);
                     }
@@ -502,8 +549,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>ctlr = <span class="self">self</span>.controller.lock();
             ctlr.io_command(IoCommand::Read)
                 .namespace_id(<span class="self">self</span>.nsid)
-                <span class="comment">// .data_ptr(DataPtr::Prp(buf.as_mut_ptr().addr() as u64, 0))
-                </span>.data_ptr(DataPtr::Prp(prp[<span class="number">0</span>], prp[<span class="number">1</span>]))
+                .data_ptr(DataPtr::Prp(prp[<span class="number">0</span>], prp[<span class="number">1</span>]))
                 .cdw10(addr <span class="kw">as </span>u32)
                 .cdw11((addr &gt;&gt; <span class="number">32</span>) <span class="kw">as </span>u32)
                 .cdw12(r_blocks <span class="kw">as </span>u32 - <span class="number">1</span>)
@@ -523,4 +569,4 @@
     }
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0-nightly (e3dfeeaa4 2023-03-07)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0-nightly (900c35403 2023-03-08)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
