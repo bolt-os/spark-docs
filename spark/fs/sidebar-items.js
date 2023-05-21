@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["FileType"],"fn":["filesystem_drivers","mount"],"mod":["fat"],"static":["__start_fs_drivers","__stop_fs_drivers"],"struct":["FilesystemDriver"],"trait":["File"]};
+window.SIDEBAR_ITEMS = {"enum":["FileType"],"fn":["filesystem_drivers","mount"],"mod":["fat"],"struct":["FilesystemDriver"],"trait":["File"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["PARTITION_TYPE_UNUSED"],"enum":["PartitionType"],"fn":["register"],"mod":["ahci","nvme"],"static":["DISKS","LOCAL_BUF"],"struct":["Disk","GptHeader","GptPartitionAttrs","GptPartitionEntry","MbrPartitionEntry","Volume"],"trait":["BlockIo","__BitFlags"]};
+window.SIDEBAR_ITEMS = {"constant":["PARTITION_TYPE_UNUSED"],"enum":["PartitionType"],"fn":["register"],"mod":["ahci","nvme"],"static":["DISKS"],"struct":["Disk","GptHeader","GptPartitionAttrs","GptPartitionEntry","MbrPartitionEntry","Volume"],"trait":["BlockIo"]};

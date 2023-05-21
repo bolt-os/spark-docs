@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/limine-rs-8010dd63b08caf2c/658a9d9/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="limine" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0-nightly (f5559e338 2023-04-24)" data-search-js="search-618e954b235f6acc.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-6f6ffb5395b17c6e.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../limine/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/git/checkouts/limine-rs-8010dd63b08caf2c/722eef0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="limine" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0-nightly (77f4f828a 2023-05-20)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-6f6ffb5395b17c6e.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../limine/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1320,6 +1320,33 @@
 <a href="#1320" id="1320">1320</a>
 <a href="#1321" id="1321">1321</a>
 <a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -1505,15 +1532,16 @@
 }
 
 <span class="attr">#[repr(C)]
-#[derive(Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 </span><span class="kw">pub struct </span>Uuid {
-    a: u32,
-    b: u16,
-    c: u16,
-    d: [u8; <span class="number">8</span>],
+    <span class="kw">pub </span>a: u32,
+    <span class="kw">pub </span>b: u16,
+    <span class="kw">pub </span>c: u16,
+    <span class="kw">pub </span>d: [u8; <span class="number">8</span>],
 }
 
 <span class="attr">#[repr(C)]
+#[derive(Clone)]
 </span><span class="kw">pub struct </span>File {
     revision: usize,
     address: <span class="kw-2">*mut </span>u8,
@@ -1631,6 +1659,7 @@
 }
 
 <span class="attr">#[repr(C)]
+#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>Framebuffer {
     <span class="kw">pub </span>addr: <span class="kw-2">*mut </span>u8,
     <span class="kw">pub </span>width: u64,
@@ -2436,6 +2465,13 @@
 <span class="comment">// SAFETY: `Rsdp` does not access the contained pointer.
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Rsdp {}
 
+<span class="kw">impl </span>Rsdp {
+    <span class="attr">#[cfg(feature = <span class="string">&quot;bootloader&quot;</span>)]
+    </span><span class="kw">pub const fn </span>new(addr: <span class="kw-2">*mut </span>u8) -&gt; Rsdp {
+        <span class="self">Self </span>{ revision: <span class="number">0</span>, rsdp_addr: addr }
+    }
+}
+
 <span class="comment">/*
  * System Management BIOS (SMBIOS)
  */
@@ -2458,6 +2494,17 @@
 <span class="comment">// SAFETY: `Smbios` does not access the contained pointer.
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Smbios {}
 
+<span class="kw">impl </span>Smbios {
+    <span class="attr">#[cfg(feature = <span class="string">&quot;bootloader&quot;</span>)]
+    </span><span class="kw">pub const fn </span>new(entry32: <span class="kw-2">*mut </span>u8, entry64: <span class="kw-2">*mut </span>u8) -&gt; Smbios {
+        <span class="self">Self </span>{
+            revision: <span class="number">0</span>,
+            entry32,
+            entry64,
+        }
+    }
+}
+
 <span class="comment">/*
  * EFI System Table
  */
@@ -2476,6 +2523,13 @@
 </span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>EfiSystemTable {}
 <span class="comment">// SAFETY: `EfiSystemTable` does not access the contained pointer.
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>EfiSystemTable {}
+
+<span class="kw">impl </span>EfiSystemTable {
+    <span class="attr">#[cfg(feature = <span class="string">&quot;bootloader&quot;</span>)]
+    </span><span class="kw">pub const fn </span>new(addr: <span class="kw-2">*mut </span>u8) -&gt; EfiSystemTable {
+        <span class="self">Self </span>{ revision: <span class="number">0</span>, addr }
+    }
+}
 
 <span class="comment">/*
  * Boot Time
@@ -2574,7 +2628,7 @@
  * Paging Mode
  */
 
-</span><span class="attr">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+</span><span class="attr">#[cfg(any(target_arch = <span class="string">&quot;x86_64&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>))]
 #[repr(usize)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>PagingMode {
@@ -2586,7 +2640,7 @@
 #[repr(usize)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>PagingMode {
-    Sv39 = <span class="number">8</span>,
+    Sv39 = <span class="number">0</span>,
     Sv48,
     Sv57,
 }
@@ -2627,9 +2681,9 @@
     <span class="attr">#[cfg(target_arch = <span class="string">&quot;riscv64&quot;</span>)]
     </span><span class="kw">pub const fn </span>mode(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PagingMode {
         <span class="kw">match </span><span class="self">self</span>.mode {
-            <span class="number">8 </span>=&gt; PagingMode::Sv39,
-            <span class="number">9 </span>=&gt; PagingMode::Sv48,
-            <span class="number">10 </span>=&gt; PagingMode::Sv57,
+            <span class="number">0 </span>=&gt; PagingMode::Sv39,
+            <span class="number">1 </span>=&gt; PagingMode::Sv48,
+            <span class="number">2 </span>=&gt; PagingMode::Sv57,
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid paging mode&quot;</span>),
         }
     }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["CompletionQueueEntry","CompletionStatus","QueuePair","SubmissionQueueEntry"],"trait":["__BitFlags"]};
+window.SIDEBAR_ITEMS = {"struct":["CompletionQueueEntry","CompletionStatus","QueuePair","SubmissionQueueEntry"]};

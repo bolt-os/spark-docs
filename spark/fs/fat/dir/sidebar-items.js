@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["ENTRY_SIZE"],"struct":["DirAttrs","DirEntry","LongDirEntry","LongName","ShortDirEntry"],"trait":["__BitFlags"]};
+window.SIDEBAR_ITEMS = {"constant":["ENTRY_SIZE"],"struct":["DirAttrs","DirEntry","LongDirEntry","LongName","ShortDirEntry"]};
