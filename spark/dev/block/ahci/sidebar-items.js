@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["hba"],"static":["AHCI_PCI_DRIVER"],"struct":["Ahci","AhciPort"]};

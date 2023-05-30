@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mem/pmm.rs`."><title>pmm.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0-nightly (77f4f828a 2023-05-20)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-6f6ffb5395b17c6e.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../spark/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mem/pmm.rs`."><title>pmm.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0-nightly (498553fc0 2023-05-29)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../spark/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -523,6 +523,124 @@
 <a href="#523" id="523">523</a>
 <a href="#524" id="524">524</a>
 <a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -553,384 +671,518 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-</span><span class="kw">use crate</span>::{page_align_down, page_align_up, pages_for, size_of, vmm::PAGE_SIZE};
-<span class="kw">use </span>core::{
-    ptr,
-    sync::atomic::{AtomicUsize, Ordering},
+</span><span class="kw">use </span><span class="kw">crate</span>::vmm::PAGE_SIZE;
+<span class="kw">use </span>core::sync::atomic::{AtomicUsize, Ordering};
+<span class="attr">#[cfg(sbi)]
+</span><span class="kw">use </span>{
+    <span class="kw">crate</span>::{page_align_down, page_align_up, pages_for, size_of},
+    <span class="comment">// core::,
+    </span>libsa::extern_sym,
 };
-<span class="kw">use </span>libsa::extern_sym;
-<span class="kw">use </span>spin::mutex::SpinMutex;
 
-<span class="kw">pub static </span>MAX_PHYS_ADDR: AtomicUsize = AtomicUsize::new(<span class="number">0</span>);
-
-<span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">struct </span>InitRange {
-    <span class="doccomment">/// base physical address
-    </span>base: usize,
-    <span class="doccomment">/// number of pages
-    </span>size: usize,
-}
-
-<span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>InitRange {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
-        f.debug_struct(<span class="string">&quot;Range&quot;</span>)
-            .field(<span class="string">&quot;base&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{:#018x}&quot;</span>, <span class="self">self</span>.base))
-            .field(<span class="string">&quot;size&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{:#018x}&quot;</span>, <span class="self">self</span>.size))
-            .field(<span class="string">&quot;end&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{:#018x}&quot;</span>, (<span class="self">self</span>.base + <span class="self">self</span>.size)))
-            .finish()
-    }
-}
-
-<span class="kw">impl </span>InitRange {
-    <span class="kw">fn </span>empty() -&gt; InitRange {
-        <span class="self">Self </span>{ base: <span class="number">0</span>, size: <span class="number">0 </span>}
+<span class="attr">#[cfg(sbi)]
+</span><span class="kw">mod </span>ranges {
+    <span class="attr">#[derive(Clone, Copy)]
+    </span><span class="kw">pub struct </span>InitRange {
+        <span class="doccomment">/// base physical address
+        </span>base: usize,
+        <span class="doccomment">/// number of pages
+        </span>size: usize,
     }
 
-    <span class="kw">fn </span>start(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.base
-    }
-
-    <span class="kw">fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.base + <span class="self">self</span>.size
-    }
-
-    <span class="kw">fn </span>overlaps_with(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>InitRange) -&gt; bool {
-        other.start() &lt;= <span class="self">self</span>.end() &amp;&amp; other.end() &gt;= <span class="self">self</span>.start()
-    }
-
-    <span class="kw">fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>InitRange) -&gt; bool {
-        <span class="self">self</span>.start() &lt;= other.start() &amp;&amp; other.end() &lt;= <span class="self">self</span>.end()
-    }
-}
-
-<span class="kw">struct </span>InitRanges {
-    ranges: [InitRange; <span class="self">Self</span>::MAX_RANGES],
-    len: usize,
-}
-
-<span class="kw">impl </span>InitRanges {
-    <span class="kw">const </span>MAX_RANGES: usize = <span class="number">256</span>;
-
-    <span class="kw">fn </span>new() -&gt; InitRanges {
-        InitRanges {
-            ranges: [InitRange::empty(); <span class="self">Self</span>::MAX_RANGES],
-            len: <span class="number">0</span>,
+    <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>InitRange {
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+            f.debug_struct(<span class="string">&quot;Range&quot;</span>)
+                .field(<span class="string">&quot;base&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{:#018x}&quot;</span>, <span class="self">self</span>.base))
+                .field(<span class="string">&quot;size&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{:#018x}&quot;</span>, <span class="self">self</span>.size))
+                .field(<span class="string">&quot;end&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{:#018x}&quot;</span>, (<span class="self">self</span>.base + <span class="self">self</span>.size)))
+                .finish()
         }
     }
 
-    <span class="kw">fn </span>ranges(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[InitRange] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.ranges[..<span class="self">self</span>.len]
-    }
-
-    <span class="kw">fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, base: usize, size: usize) {
-        <span class="kw">let </span>insert_range = InitRange { base, size };
-
-        <span class="kw">if </span><span class="self">self
-            </span>.ranges()
-            .iter()
-            .any(|range| range.overlaps_with(<span class="kw-2">&amp;</span>insert_range))
-        {
-            <span class="macro">panic!</span>(<span class="string">&quot;overlapping free memory ranges&quot;</span>);
+    <span class="kw">impl </span>InitRange {
+        <span class="kw">fn </span>empty() -&gt; InitRange {
+            <span class="self">Self </span>{ base: <span class="number">0</span>, size: <span class="number">0 </span>}
         }
 
-        <span class="kw">let </span>insertion_point = <span class="self">self
-            </span>.ranges
-            .partition_point(|range| insert_range.start() &lt; range.start());
+        <span class="kw">pub fn </span>start(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+            <span class="self">self</span>.base
+        }
 
-        <span class="macro">debug_assert!</span>(insertion_point &lt;= <span class="self">self</span>.len);
+        <span class="kw">pub fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+            <span class="self">self</span>.base + <span class="self">self</span>.size
+        }
 
-        <span class="kw">if </span>insertion_point &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>prev = <span class="kw-2">&amp;mut </span><span class="self">self</span>.ranges[insertion_point - <span class="number">1</span>];
-            <span class="kw">if </span>prev.end() == insert_range.start() {
-                prev.size += insert_range.size;
-                <span class="kw">return</span>;
+        <span class="kw">fn </span>overlaps_with(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>InitRange) -&gt; bool {
+            other.start() &lt;= <span class="self">self</span>.end() &amp;&amp; other.end() &gt;= <span class="self">self</span>.start()
+        }
+
+        <span class="kw">fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>InitRange) -&gt; bool {
+            <span class="self">self</span>.start() &lt;= other.start() &amp;&amp; other.end() &lt;= <span class="self">self</span>.end()
+        }
+    }
+
+    <span class="kw">pub struct </span>InitRanges {
+        <span class="kw">pub </span>ranges: [InitRange; <span class="self">Self</span>::MAX_RANGES],
+        <span class="kw">pub </span>len: usize,
+    }
+
+    <span class="kw">impl </span>InitRanges {
+        <span class="kw">const </span>MAX_RANGES: usize = <span class="number">256</span>;
+
+        <span class="kw">pub fn </span>new() -&gt; InitRanges {
+            InitRanges {
+                ranges: [InitRange::empty(); <span class="self">Self</span>::MAX_RANGES],
+                len: <span class="number">0</span>,
             }
         }
 
-        <span class="kw">if </span><span class="self">self</span>.len &gt; <span class="number">0 </span>&amp;&amp; insertion_point &lt; <span class="self">self</span>.len - <span class="number">1 </span>{
-            <span class="kw">let </span>next = <span class="kw-2">&amp;mut </span><span class="self">self</span>.ranges[insertion_point + <span class="number">1</span>];
-            <span class="kw">if </span>insert_range.end() == next.start() {
-                next.size += insert_range.size;
-                next.base = insert_range.base;
-                <span class="kw">return</span>;
+        <span class="kw">pub fn </span>ranges(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[InitRange] {
+            <span class="kw-2">&amp;</span><span class="self">self</span>.ranges[..<span class="self">self</span>.len]
+        }
+
+        <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, base: usize, size: usize) {
+            <span class="kw">let </span>insert_range = InitRange { base, size };
+
+            <span class="kw">if </span><span class="self">self
+                </span>.ranges()
+                .iter()
+                .any(|range| range.overlaps_with(<span class="kw-2">&amp;</span>insert_range))
+            {
+                <span class="macro">panic!</span>(<span class="string">&quot;overlapping free memory ranges&quot;</span>);
             }
-        }
 
-        <span class="macro">assert!</span>(insertion_point &lt; <span class="self">Self</span>::MAX_RANGES, <span class="string">&quot;too many memory ranges&quot;</span>);
+            <span class="kw">let </span>insertion_point = <span class="self">self
+                </span>.ranges
+                .partition_point(|range| insert_range.start() &lt; range.start());
 
-        <span class="macro">println!</span>(<span class="string">&quot;insert: {insert_range:?}&quot;</span>);
-        <span class="self">self</span>.ranges[insertion_point] = insert_range;
-        <span class="self">self</span>.len += <span class="number">1</span>;
-    }
+            <span class="macro">debug_assert!</span>(insertion_point &lt;= <span class="self">self</span>.len);
 
-    <span class="kw">fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, base: usize, size: usize) {
-        <span class="kw">let </span>remove_range = InitRange { base, size };
-        <span class="macro">println!</span>(<span class="string">&quot;remove: {remove_range:?}&quot;</span>);
-
-        <span class="kw">let </span>(index, from_range) = <span class="self">self</span>.ranges[..<span class="self">self</span>.len]
-            .iter_mut()
-            .enumerate()
-            .find(|(<span class="kw">_</span>, range)| range.contains(<span class="kw-2">&amp;</span>remove_range))
-            .expect(<span class="string">&quot;msg;&quot;</span>);
-
-        <span class="kw">if </span>base == from_range.base {
-            from_range.size -= size;
-            from_range.base = base + size;
-            <span class="kw">return</span>;
-        }
-
-        <span class="kw">if </span>base + size == from_range.end() {
-            from_range.size -= size;
-            <span class="kw">return</span>;
-        }
-
-        <span class="macro">assert!</span>(<span class="self">self</span>.len &lt; <span class="self">Self</span>::MAX_RANGES, <span class="string">&quot;too many memory ranges&quot;</span>);
-
-        <span class="kw">let </span>new_range = InitRange {
-            base: remove_range.end(),
-            size: from_range.end() - remove_range.end(),
-        };
-
-        from_range.size = remove_range.start() - from_range.start();
-
-        <span class="kw">let </span>insertion_point = index + <span class="number">1</span>;
-        <span class="self">self</span>.ranges
-            .copy_within(insertion_point..<span class="self">self</span>.len, insertion_point + <span class="number">1</span>);
-        <span class="self">self</span>.ranges[insertion_point] = new_range;
-        <span class="self">self</span>.len += <span class="number">1</span>;
-    }
-}
-
-<span class="attr">#[repr(C)]
-#[derive(Debug)]
-</span><span class="kw">pub struct </span>Region {
-    base: usize,
-    num_frames: usize,
-    prev: <span class="kw-2">*mut </span>Region,
-    next: <span class="kw-2">*mut </span>Region,
-}
-
-<span class="kw">impl </span>Region {
-    <span class="kw">const fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.base + PAGE_SIZE * <span class="self">self</span>.num_frames
-    }
-}
-
-<span class="doccomment">/// A doubly-linked list of usable memory ranges stored intrusively in the memory it describes
-</span><span class="attr">#[repr(C)]
-#[derive(Debug)]
-</span><span class="kw">struct </span>FreeList {
-    head: <span class="kw-2">*mut </span>Region,
-    tail: <span class="kw-2">*mut </span>Region,
-    len: usize,
-}
-
-<span class="kw">unsafe impl </span>Send <span class="kw">for </span>FreeList {}
-
-<span class="kw">impl </span>FreeList {
-    <span class="kw">const fn </span>new() -&gt; FreeList {
-        <span class="self">Self </span>{
-            head: ptr::null_mut(),
-            tail: ptr::null_mut(),
-            len: <span class="number">0</span>,
-        }
-    }
-
-    <span class="kw">unsafe fn </span>remove_region(<span class="kw-2">&amp;mut </span><span class="self">self</span>, region: <span class="kw-2">*mut </span>Region) {
-        <span class="macro">assert!</span>(!region.is_null());
-
-        <span class="kw">let </span>prev = (<span class="kw-2">*</span>region).prev;
-        <span class="kw">let </span>next = (<span class="kw-2">*</span>region).next;
-
-        <span class="kw">if </span>prev.is_null() {
-            <span class="self">self</span>.head = next;
-        } <span class="kw">else </span>{
-            (<span class="kw-2">*</span>prev).next = next;
-        }
-        <span class="kw">if </span>next.is_null() {
-            <span class="self">self</span>.tail = prev;
-        } <span class="kw">else </span>{
-            (<span class="kw-2">*</span>next).prev = prev;
-        }
-
-        <span class="self">self</span>.len -= <span class="number">1</span>;
-    }
-
-    <span class="kw">unsafe fn </span>insert_region(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>base: usize, <span class="kw-2">mut </span>num_frames: usize) {
-        <span class="kw">let </span><span class="kw-2">mut </span>prev = <span class="self">self</span>.tail;
-        <span class="kw">let </span><span class="kw-2">mut </span>next = ptr::null_mut();
-        <span class="kw">while </span>!prev.is_null() {
-            <span class="kw">if </span>(<span class="kw-2">*</span>prev).base &lt; base {
-                <span class="kw">break</span>;
-            }
-            next = prev;
-            prev = (<span class="kw-2">*</span>prev).prev;
-        }
-
-        <span class="kw">if </span>!prev.is_null() &amp;&amp; (<span class="kw-2">*</span>prev).end() == base {
-            base = (<span class="kw-2">*</span>prev).base;
-            num_frames += (<span class="kw-2">*</span>prev).num_frames;
-            prev = (<span class="kw-2">*</span>prev).prev;
-        }
-        <span class="kw">if </span>!next.is_null() {
-            <span class="kw">let </span>end = base + PAGE_SIZE * num_frames;
-            <span class="kw">if </span>end == (<span class="kw-2">*</span>next).base {
-                num_frames += (<span class="kw-2">*</span>next).num_frames;
-                next = (<span class="kw-2">*</span>next).next;
-            }
-        }
-
-        <span class="kw">let </span>new = base <span class="kw">as </span><span class="kw-2">*mut </span>Region;
-        new.write(Region {
-            base,
-            num_frames,
-            prev,
-            next,
-        });
-
-        <span class="kw">if </span>prev.is_null() {
-            <span class="self">self</span>.head = new;
-        } <span class="kw">else </span>{
-            (<span class="kw-2">*</span>prev).next = new;
-        }
-        <span class="kw">if </span>next.is_null() {
-            <span class="self">self</span>.tail = new;
-        } <span class="kw">else </span>{
-            (<span class="kw-2">*</span>next).prev = new;
-        }
-
-        <span class="self">self</span>.len += <span class="number">1</span>;
-    }
-}
-
-<span class="kw">static </span>PHYSMAP: SpinMutex&lt;FreeList&gt; = SpinMutex::new(FreeList::new());
-
-<span class="doccomment">/// Allocate frames of physical memory
-</span><span class="kw">pub fn </span>alloc_frames(num_frames: usize) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>physmap = PHYSMAP.lock();
-    <span class="kw">let </span><span class="kw-2">mut </span>region = physmap.tail;
-
-    <span class="kw">while </span>!region.is_null() {
-        <span class="kw">unsafe </span>{
-            <span class="kw">if </span>(<span class="kw-2">*</span>region).num_frames &gt;= num_frames {
-                (<span class="kw-2">*</span>region).num_frames -= num_frames;
-                <span class="kw">if </span>(<span class="kw-2">*</span>region).num_frames == <span class="number">0 </span>{
-                    physmap.remove_region(region);
+            <span class="kw">if </span>insertion_point &gt; <span class="number">0 </span>{
+                <span class="kw">let </span>prev = <span class="kw-2">&amp;mut </span><span class="self">self</span>.ranges[insertion_point - <span class="number">1</span>];
+                <span class="kw">if </span>prev.end() == insert_range.start() {
+                    prev.size += insert_range.size;
+                    <span class="kw">return</span>;
                 }
-                <span class="kw">return </span><span class="prelude-val">Some</span>((<span class="kw-2">*</span>region).base + PAGE_SIZE * (<span class="kw-2">*</span>region).num_frames);
             }
-            region = (<span class="kw-2">*</span>region).prev;
+
+            <span class="kw">if </span><span class="self">self</span>.len &gt; <span class="number">0 </span>&amp;&amp; insertion_point &lt; <span class="self">self</span>.len - <span class="number">1 </span>{
+                <span class="kw">let </span>next = <span class="kw-2">&amp;mut </span><span class="self">self</span>.ranges[insertion_point + <span class="number">1</span>];
+                <span class="kw">if </span>insert_range.end() == next.start() {
+                    next.size += insert_range.size;
+                    next.base = insert_range.base;
+                    <span class="kw">return</span>;
+                }
+            }
+
+            <span class="macro">assert!</span>(insertion_point &lt; <span class="self">Self</span>::MAX_RANGES, <span class="string">&quot;too many memory ranges&quot;</span>);
+
+            <span class="macro">println!</span>(<span class="string">&quot;insert: {insert_range:?}&quot;</span>);
+            <span class="self">self</span>.ranges[insertion_point] = insert_range;
+            <span class="self">self</span>.len += <span class="number">1</span>;
+        }
+
+        <span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, base: usize, size: usize) {
+            <span class="kw">let </span>remove_range = InitRange { base, size };
+            <span class="macro">println!</span>(<span class="string">&quot;remove: {remove_range:?}&quot;</span>);
+
+            <span class="kw">let </span>(index, from_range) = <span class="self">self</span>.ranges[..<span class="self">self</span>.len]
+                .iter_mut()
+                .enumerate()
+                .find(|(<span class="kw">_</span>, range)| range.contains(<span class="kw-2">&amp;</span>remove_range))
+                .expect(<span class="string">&quot;msg;&quot;</span>);
+
+            <span class="kw">if </span>base == from_range.base {
+                from_range.size -= size;
+                from_range.base = base + size;
+                <span class="kw">return</span>;
+            }
+
+            <span class="kw">if </span>base + size == from_range.end() {
+                from_range.size -= size;
+                <span class="kw">return</span>;
+            }
+
+            <span class="macro">assert!</span>(<span class="self">self</span>.len &lt; <span class="self">Self</span>::MAX_RANGES, <span class="string">&quot;too many memory ranges&quot;</span>);
+
+            <span class="kw">let </span>new_range = InitRange {
+                base: remove_range.end(),
+                size: from_range.end() - remove_range.end(),
+            };
+
+            from_range.size = remove_range.start() - from_range.start();
+
+            <span class="kw">let </span>insertion_point = index + <span class="number">1</span>;
+            <span class="self">self</span>.ranges
+                .copy_within(insertion_point..<span class="self">self</span>.len, insertion_point + <span class="number">1</span>);
+            <span class="self">self</span>.ranges[insertion_point] = new_range;
+            <span class="self">self</span>.len += <span class="number">1</span>;
+        }
+    }
+}
+
+<span class="attr">#[cfg(sbi)]
+</span><span class="kw">mod </span>physmap {
+    <span class="kw">use </span><span class="kw">crate</span>::vmm::PAGE_SIZE;
+    <span class="kw">use </span>core::ptr;
+    <span class="kw">use </span>spin::mutex::SpinMutex;
+
+    <span class="attr">#[repr(C)]
+    #[derive(Debug)]
+    </span><span class="kw">pub struct </span>Region {
+        <span class="kw">pub </span>base: usize,
+        <span class="kw">pub </span>num_frames: usize,
+        prev: <span class="kw-2">*mut </span>Region,
+        <span class="kw">pub </span>next: <span class="kw-2">*mut </span>Region,
+    }
+
+    <span class="kw">impl </span>Region {
+        <span class="kw">const fn </span>end(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+            <span class="self">self</span>.base + PAGE_SIZE * <span class="self">self</span>.num_frames
         }
     }
 
-    <span class="prelude-val">None
+    <span class="doccomment">/// A doubly-linked list of usable memory ranges stored intrusively in the memory it describes
+    </span><span class="attr">#[repr(C)]
+    #[derive(Debug)]
+    </span><span class="kw">pub struct </span>FreeList {
+        <span class="kw">pub </span>head: <span class="kw-2">*mut </span>Region,
+        tail: <span class="kw-2">*mut </span>Region,
+        <span class="kw">pub </span>len: usize,
+    }
+
+    <span class="kw">impl </span>FreeList {
+        <span class="kw">const fn </span>new() -&gt; FreeList {
+            <span class="self">Self </span>{
+                head: ptr::null_mut(),
+                tail: ptr::null_mut(),
+                len: <span class="number">0</span>,
+            }
+        }
+
+        <span class="kw">unsafe fn </span>remove_region(<span class="kw-2">&amp;mut </span><span class="self">self</span>, region: <span class="kw-2">*mut </span>Region) {
+            <span class="macro">assert!</span>(!region.is_null());
+
+            <span class="kw">let </span>prev = (<span class="kw-2">*</span>region).prev;
+            <span class="kw">let </span>next = (<span class="kw-2">*</span>region).next;
+
+            <span class="kw">if </span>prev.is_null() {
+                <span class="self">self</span>.head = next;
+            } <span class="kw">else </span>{
+                (<span class="kw-2">*</span>prev).next = next;
+            }
+            <span class="kw">if </span>next.is_null() {
+                <span class="self">self</span>.tail = prev;
+            } <span class="kw">else </span>{
+                (<span class="kw-2">*</span>next).prev = prev;
+            }
+
+            <span class="self">self</span>.len -= <span class="number">1</span>;
+        }
+
+        <span class="kw">unsafe fn </span>insert_region(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>base: usize, <span class="kw-2">mut </span>num_frames: usize) {
+            <span class="kw">let </span><span class="kw-2">mut </span>prev = <span class="self">self</span>.tail;
+            <span class="kw">let </span><span class="kw-2">mut </span>next = ptr::null_mut();
+            <span class="kw">while </span>!prev.is_null() {
+                <span class="kw">if </span>(<span class="kw-2">*</span>prev).base &lt; base {
+                    <span class="kw">break</span>;
+                }
+                next = prev;
+                prev = (<span class="kw-2">*</span>prev).prev;
+            }
+
+            <span class="kw">if </span>!prev.is_null() &amp;&amp; (<span class="kw-2">*</span>prev).end() == base {
+                base = (<span class="kw-2">*</span>prev).base;
+                num_frames += (<span class="kw-2">*</span>prev).num_frames;
+                prev = (<span class="kw-2">*</span>prev).prev;
+            }
+            <span class="kw">if </span>!next.is_null() {
+                <span class="kw">let </span>end = base + PAGE_SIZE * num_frames;
+                <span class="kw">if </span>end == (<span class="kw-2">*</span>next).base {
+                    num_frames += (<span class="kw-2">*</span>next).num_frames;
+                    next = (<span class="kw-2">*</span>next).next;
+                }
+            }
+
+            <span class="kw">let </span>new = base <span class="kw">as </span><span class="kw-2">*mut </span>Region;
+            new.write(Region {
+                base,
+                num_frames,
+                prev,
+                next,
+            });
+
+            <span class="kw">if </span>prev.is_null() {
+                <span class="self">self</span>.head = new;
+            } <span class="kw">else </span>{
+                (<span class="kw-2">*</span>prev).next = new;
+            }
+            <span class="kw">if </span>next.is_null() {
+                <span class="self">self</span>.tail = new;
+            } <span class="kw">else </span>{
+                (<span class="kw-2">*</span>next).prev = new;
+            }
+
+            <span class="self">self</span>.len += <span class="number">1</span>;
+        }
+    }
+
+    <span class="kw">unsafe impl </span>Send <span class="kw">for </span>FreeList {}
+
+    <span class="kw">pub static </span>PHYSMAP: SpinMutex&lt;FreeList&gt; = SpinMutex::new(FreeList::new());
+
+    <span class="doccomment">/// Allocate frames of physical memory
+    </span><span class="kw">pub fn </span>alloc_frames(num_frames: usize) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>physmap = PHYSMAP.lock();
+        <span class="kw">let </span><span class="kw-2">mut </span>region = physmap.tail;
+
+        <span class="kw">while </span>!region.is_null() {
+            <span class="kw">unsafe </span>{
+                <span class="kw">if </span>(<span class="kw-2">*</span>region).num_frames &gt;= num_frames {
+                    (<span class="kw-2">*</span>region).num_frames -= num_frames;
+                    <span class="kw">if </span>(<span class="kw-2">*</span>region).num_frames == <span class="number">0 </span>{
+                        physmap.remove_region(region);
+                    }
+                    <span class="kw">return </span><span class="prelude-val">Some</span>((<span class="kw-2">*</span>region).base + PAGE_SIZE * (<span class="kw-2">*</span>region).num_frames);
+                }
+                region = (<span class="kw-2">*</span>region).prev;
+            }
+        }
+
+        <span class="prelude-val">None
+    </span>}
+
+    <span class="doccomment">/// Free physical frames of memory
+    ///
+    /// # Safety
+    ///
+    /// The memory being freed must have previously been allocated by a call
+    /// to [`alloc_frames()`] or [`alloc_frames_aligned()`]. The only exception to
+    /// this is when the physical memory allocator is first initialized.
+    </span><span class="kw">pub unsafe fn </span>free_frames(base: usize, num_frames: usize) {
+        PHYSMAP.lock().insert_region(base, num_frames);
+    }
+
+    <span class="doccomment">/// Prints the current list of free physical frames
+    </span><span class="kw">pub fn </span>print() {
+        <span class="kw">let </span>physmap = PHYSMAP.lock();
+        <span class="kw">let </span><span class="kw-2">mut </span>region = physmap.head;
+        <span class="kw">unsafe </span>{
+            <span class="kw">while </span>!region.is_null() {
+                <span class="macro">println!</span>(
+                    <span class="string">&quot;  {:#018x} -&gt; {:#018x}, {} pages&quot;</span>,
+                    (<span class="kw-2">*</span>region).base,
+                    (<span class="kw-2">*</span>region).end(),
+                    (<span class="kw-2">*</span>region).num_frames
+                );
+                region = (<span class="kw-2">*</span>region).next;
+            }
+        }
+    }
+
+    <span class="comment">// /// Allocate frames of physical memory aligned to a specific boundary
+    // ///
+    // /// # Panics
+    // ///
+    // /// This function will panic if `align` is not a power of two.
+    // pub fn alloc_frames_aligned(num_frames: usize, align: usize, low_memory: bool) -&gt; Option&lt;usize&gt; {
+    //     assert!(align.is_power_of_two());
+    //     // let align = page_align_up!(align);
+    //
+    //     let mut physmap = PHYSMAP.lock();
+    //     let mut region = physmap.head;
+    //
+    //     // while let Some(mut region) = regionp {
+    //     while !region.is_null() {
+    //         // let region = unsafe { region.as_mut() };
+    //
+    //         if region.num_frames &gt;= num_frames {
+    //             // how far would we have to increment the base address to make it aligned
+    //             let align_offset = align.wrapping_sub(region.base) &amp; (align - 1);
+    //
+    //             if align_offset == 0 {
+    //                 region.num_frames -= num_frames;
+    //                 let base = if region.num_frames == 0 {
+    //                     physmap.remove_region(region);
+    //                     region.base
+    //                 } else {
+    //                     let base = region.base;
+    //                     region.base += num_frames * PAGE_SIZE;
+    //                     base
+    //                 };
+    //
+    //                 return Some(base);
+    //             }
+    //
+    //             // are there still enough frames if we increment the base?
+    //             let align_frames = align_offset / PAGE_SIZE;
+    //
+    //             if region.num_frames &lt; align_frames + num_frames {
+    //                 continue;
+    //             }
+    //
+    //             // are we execeeding a `low_memory` requirement?
+    //             let alloc_base = region.base + align_frames * PAGE_SIZE;
+    //             if low_memory &amp;&amp; alloc_base + num_frames * PAGE_SIZE &gt; u32::MAX as usize {
+    //                 // the list is sorted, if this node exceeds the limit the rest will too.
+    //                 return None;
+    //             }
+    //
+    //             // yes, pull those frames and split the entry
+    //             let new_base = region.base + PAGE_SIZE * (align_frames + num_frames);
+    //             let new_size = region.end() - new_base;
+    //
+    //             let new_node = unsafe {
+    //                 let ptr = new_base as *mut Region;
+    //
+    //                 ptr.write(Region {
+    //                     base: new_base,
+    //                     num_frames: new_size / PAGE_SIZE,
+    //                     next: region.next,
+    //                     prev: regionp,
+    //                 });
+    //
+    //                 NonNull::new_unchecked(ptr)
+    //             };
+    //
+    //             region.num_frames = align_frames;
+    //             region.next = Some(new_node);
+    //
+    //             if let Some(mut next) = region.next {
+    //                 unsafe { next.as_mut().prev = Some(new_node) };
+    //             } else {
+    //                 physmap.tail = Some(new_node);
+    //             }
+    //
+    //             return Some(alloc_base);
+    //         }
+    //
+    //         regionp = region.next;
+    //     }
+    //
+    //     None
+    // }
 </span>}
 
-<span class="comment">// /// Allocate frames of physical memory aligned to a specific boundary
-// ///
-// /// # Panics
-// ///
-// /// This function will panic if `align` is not a power of two.
-// pub fn alloc_frames_aligned(num_frames: usize, align: usize, low_memory: bool) -&gt; Option&lt;usize&gt; {
-//     assert!(align.is_power_of_two());
-//     // let align = page_align_up!(align);
-//
-//     let mut physmap = PHYSMAP.lock();
-//     let mut region = physmap.head;
-//
-//     // while let Some(mut region) = regionp {
-//     while !region.is_null() {
-//         // let region = unsafe { region.as_mut() };
-//
-//         if region.num_frames &gt;= num_frames {
-//             // how far would we have to increment the base address to make it aligned
-//             let align_offset = align.wrapping_sub(region.base) &amp; (align - 1);
-//
-//             if align_offset == 0 {
-//                 region.num_frames -= num_frames;
-//                 let base = if region.num_frames == 0 {
-//                     physmap.remove_region(region);
-//                     region.base
-//                 } else {
-//                     let base = region.base;
-//                     region.base += num_frames * PAGE_SIZE;
-//                     base
-//                 };
-//
-//                 return Some(base);
-//             }
-//
-//             // are there still enough frames if we increment the base?
-//             let align_frames = align_offset / PAGE_SIZE;
-//
-//             if region.num_frames &lt; align_frames + num_frames {
-//                 continue;
-//             }
-//
-//             // are we execeeding a `low_memory` requirement?
-//             let alloc_base = region.base + align_frames * PAGE_SIZE;
-//             if low_memory &amp;&amp; alloc_base + num_frames * PAGE_SIZE &gt; u32::MAX as usize {
-//                 // the list is sorted, if this node exceeds the limit the rest will too.
-//                 return None;
-//             }
-//
-//             // yes, pull those frames and split the entry
-//             let new_base = region.base + PAGE_SIZE * (align_frames + num_frames);
-//             let new_size = region.end() - new_base;
-//
-//             let new_node = unsafe {
-//                 let ptr = new_base as *mut Region;
-//
-//                 ptr.write(Region {
-//                     base: new_base,
-//                     num_frames: new_size / PAGE_SIZE,
-//                     next: region.next,
-//                     prev: regionp,
-//                 });
-//
-//                 NonNull::new_unchecked(ptr)
-//             };
-//
-//             region.num_frames = align_frames;
-//             region.next = Some(new_node);
-//
-//             if let Some(mut next) = region.next {
-//                 unsafe { next.as_mut().prev = Some(new_node) };
-//             } else {
-//                 physmap.tail = Some(new_node);
-//             }
-//
-//             return Some(alloc_base);
-//         }
-//
-//         regionp = region.next;
-//     }
-//
-//     None
-// }
+<span class="comment">// #[cfg(sbi)]
+</span><span class="kw">pub static </span>MAX_PHYS_ADDR: AtomicUsize = AtomicUsize::new(<span class="number">0</span>);
 
-</span><span class="doccomment">/// Free physical frames of memory
+<span class="attr">#[cfg(sbi)]
+</span><span class="kw">pub use </span>physmap::{alloc_frames, free_frames};
+
+<span class="doccomment">/// Allocate frames of physical memory
+</span><span class="attr">#[cfg(uefi)]
+</span><span class="kw">pub fn </span>alloc_frames(num_frames: usize) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+    <span class="kw">use </span>uefi::table::{AllocPagesType, MemoryType};
+    <span class="kw">let </span>bs = uefi::boot_services();
+    bs.allocate_pages(AllocPagesType::Any, MemoryType::LOADER_DATA, num_frames)
+        .map(|addr| addr <span class="kw">as </span>usize)
+        .ok()
+}
+
+<span class="doccomment">/// Free physical frames of memory
 ///
 /// # Safety
 ///
 /// The memory being freed must have previously been allocated by a call
 /// to [`alloc_frames()`] or [`alloc_frames_aligned()`]. The only exception to
 /// this is when the physical memory allocator is first initialized.
+///
+/// # Panics
+///
+/// On UEFI this function may panic if the firmware returns an error.
+</span><span class="attr">#[cfg(uefi)]
 </span><span class="kw">pub unsafe fn </span>free_frames(base: usize, num_frames: usize) {
-    PHYSMAP.lock().insert_region(base, num_frames);
+    <span class="kw">let </span>bs = uefi::boot_services();
+    bs.free_pages(base <span class="kw">as </span>u64, num_frames).unwrap();
 }
 
-<span class="kw">pub fn </span>generate_limine_memory_map(
-    vmspace: <span class="kw-2">&amp;mut </span><span class="kw">super</span>::vmm::AddressSpace,
-) -&gt; (<span class="kw-2">*mut *mut </span>limine::MemoryMapEntry, usize) {
-    <span class="kw">let </span>map = PHYSMAP.lock();
+<span class="doccomment">/// Generate a Limine memory map and exit boot services.
+///
+/// # Panics
+///
+/// This function may panic if it fails to allocate memory for the map or fails to exit
+/// boot services.
+</span><span class="attr">#[cfg(all(uefi, feature = <span class="string">&quot;proto-limine&quot;</span>))]
+</span><span class="kw">pub fn </span>generate_limine_memory_map(vmspace: <span class="kw-2">&amp;mut </span><span class="kw">super</span>::vmm::AddressSpace) -&gt; limine::MemoryMap {
+    <span class="kw">use </span>core::mem::MaybeUninit;
+    <span class="kw">use </span>uefi::table::MemoryDescriptor;
+
+    <span class="kw">let </span>bs = uefi::boot_services();
+
+    <span class="comment">// Get the size of the memory map.
+    </span><span class="kw">let </span>map_info = bs.get_memory_map_info().unwrap();
+
+    <span class="comment">// Allocate buffers for everything we need:
+    // - the memory map itself
+    // - the Limine memory map entries
+    // - the pointers to the Limine entries
+    </span><span class="kw">let </span>buffer = Box::leak(<span class="macro">vec!</span>[<span class="number">0</span>; map_info.buffer_size].into_boxed_slice());
+    <span class="kw">let </span>len = map_info.buffer_size / map_info.descriptor_size;
+    <span class="kw">let </span>limine_entries = Box::leak(Box::&lt;[limine::MemoryMapEntry]&gt;::new_uninit_slice(len));
+    <span class="kw">let </span>limine_ptrs = Box::leak(Box::new_uninit_slice(len));
+
+    <span class="comment">// Get the memory map.
+    </span><span class="kw">let </span>map_info = bs.get_memory_map(buffer, map_info.map_key).unwrap();
+
+    <span class="comment">// Exit boot services.
+    </span><span class="kw">if let </span><span class="prelude-val">Err</span>(status) = bs.exit_boot_services(uefi::image_handle(), map_info.map_key) {
+        <span class="macro">panic!</span>(<span class="string">&quot;failed to exit boot services: {status:?}&quot;</span>);
+    }
+
+    <span class="comment">// Translate the UEFI memory map into a Limine memory map.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0</span>;
+    <span class="kw">loop </span>{
+        <span class="kw">if </span>offset + map_info.descriptor_size &gt;= map_info.buffer_size {
+            <span class="kw">break</span>;
+        }
+
+        <span class="kw">let </span>efi_entry = <span class="kw">unsafe </span>{
+            <span class="kw-2">&amp;*</span>buffer[offset..][..map_info.descriptor_size]
+                .as_ptr()
+                .cast::&lt;MemoryDescriptor&gt;()
+        };
+
+        <span class="kw">let </span>limine_entry = limine::MemoryMapEntry::new(
+            efi_entry.phys <span class="kw">as </span>usize,
+            efi_entry.num_pages <span class="kw">as </span>usize * PAGE_SIZE,
+            efi_entry.kind.into(),
+        );
+
+        <span class="kw">unsafe </span>{
+            <span class="kw">let </span>ptr = limine_entries
+                .as_mut_ptr()
+                .add(i)
+                .cast::&lt;limine::MemoryMapEntry&gt;();
+            ptr.write(limine_entry);
+
+            limine_ptrs
+                .as_mut_ptr()
+                .add(i)
+                .write(MaybeUninit::new(vmspace.direct_map_ptr_mut(ptr)));
+        }
+
+        i += <span class="number">1</span>;
+        offset += map_info.descriptor_size;
+    }
+
+    <span class="kw">unsafe </span>{
+        <span class="kw">let </span>ptr = MaybeUninit::slice_assume_init_mut(limine_ptrs).as_mut_ptr();
+        limine::MemoryMap::new(ptr, i)
+    }
+}
+
+<span class="attr">#[cfg(sbi)]
+</span><span class="kw">pub fn </span>generate_limine_memory_map(vmspace: <span class="kw-2">&amp;mut </span><span class="kw">super</span>::vmm::AddressSpace) -&gt; limine::MemoryMap {
+    <span class="kw">let </span>map = physmap::PHYSMAP.lock();
 
     <span class="kw">let </span>needed = <span class="macro">pages_for!</span>((<span class="macro">size_of!</span>(usize) + <span class="macro">size_of!</span>(limine::MemoryMapEntry)) * map.len);
     drop(map);
 
     <span class="kw">let </span>buffer = alloc_frames(needed).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>u8;
 
-    <span class="kw">let </span>map = PHYSMAP.lock();
+    <span class="kw">let </span>map = physmap::PHYSMAP.lock();
 
     <span class="kw">unsafe </span>{
         <span class="kw">let </span>pointers = buffer.cast::&lt;<span class="kw-2">*mut </span>limine::MemoryMapEntry&gt;();
@@ -958,33 +1210,17 @@
             i += <span class="number">1</span>;
         }
 
-        (
+        limine::MemoryMap::new(
             pointers.with_addr(vmspace.higher_half_start() + pointers.addr()),
             i,
         )
     }
 }
 
-<span class="doccomment">/// Prints the current list of free physical frames
-</span><span class="kw">pub fn </span>print() {
-    <span class="kw">let </span>physmap = PHYSMAP.lock();
-    <span class="kw">let </span><span class="kw-2">mut </span>region = physmap.head;
-    <span class="kw">unsafe </span>{
-        <span class="kw">while </span>!region.is_null() {
-            <span class="macro">println!</span>(
-                <span class="string">&quot;  {:#018x} -&gt; {:#018x}, {} pages&quot;</span>,
-                (<span class="kw-2">*</span>region).base,
-                (<span class="kw-2">*</span>region).end(),
-                (<span class="kw-2">*</span>region).num_frames
-            );
-            region = (<span class="kw-2">*</span>region).next;
-        }
-    }
-}
-
 <span class="doccomment">/// Initialize the physical memory allocator from the information in the Device Tree
+</span><span class="attr">#[cfg(all(not(uefi), feature = <span class="string">&quot;fdt&quot;</span>))]
 </span><span class="kw">pub fn </span>init_from_fdt(fdt: <span class="kw-2">&amp;</span>fdt::Fdt, dtb_ptr: <span class="kw-2">*const </span>u8) {
-    <span class="kw">let </span><span class="kw-2">mut </span>initmap = InitRanges::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>initmap = ranges::InitRanges::new();
     <span class="kw">let </span><span class="kw-2">mut </span>max_phys_addr = <span class="number">0</span>;
 
     <span class="kw">for </span>node <span class="kw">in </span>fdt.find_all_nodes(<span class="string">&quot;/memory&quot;</span>) {

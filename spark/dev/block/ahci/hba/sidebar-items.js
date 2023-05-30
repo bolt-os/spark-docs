@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["COMMAND_TABLE_PRDT_COUNT"],"static":["COMMAND","COMMAND_TBL","FIS_RECEIVED"],"struct":["Command","CommandTable","FisReceived","HostToDevice","Memory","PRDT","Port","PortIterator"]};

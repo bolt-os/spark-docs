@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mem/vmm.rs`."><title>vmm.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0-nightly (77f4f828a 2023-05-20)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-6f6ffb5395b17c6e.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../spark/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mem/vmm.rs`."><title>vmm.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="spark" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0-nightly (498553fc0 2023-05-29)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../spark/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -493,6 +493,89 @@
 <a href="#493" id="493">493</a>
 <a href="#494" id="494">494</a>
 <a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -523,10 +606,15 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-</span><span class="kw">use crate</span>::{dev::fdt, pages_for, pmm, pmm::MAX_PHYS_ADDR, BOOT_HART_ID};
+</span><span class="kw">use crate</span>::{
+    dev::fdt,
+    pages_for,
+    pmm::{<span class="self">self</span>},
+    BOOT_HART_ID,
+};
 <span class="kw">use </span>alloc::collections::LinkedList;
 <span class="kw">use </span>core::{
-    cmp, ptr,
+    ptr,
     sync::atomic::{AtomicUsize, Ordering},
 };
 
@@ -544,12 +632,12 @@
 
 <span class="kw">impl </span>PagingMode {
     <span class="kw">pub const fn </span>levels(<span class="self">self</span>) -&gt; usize {
-        <span class="kw">match </span><span class="self">self </span>{
-            PagingMode::Sv39 =&gt; <span class="number">3</span>,
-            PagingMode::Sv48 =&gt; <span class="number">4</span>,
-            PagingMode::Sv57 =&gt; <span class="number">5</span>,
-        }
-    }
+        <span class="self">self </span><span class="kw">as </span>usize - <span class="number">5
+    </span>}
+
+    <span class="kw">pub const fn </span>max_level(<span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.levels() - <span class="number">1
+    </span>}
 
     <span class="kw">pub const fn </span>higher_half_start(<span class="self">self</span>) -&gt; usize {
         <span class="kw">match </span><span class="self">self </span>{
@@ -557,6 +645,12 @@
             PagingMode::Sv48 =&gt; <span class="number">0xffff800000000000</span>,
             PagingMode::Sv57 =&gt; <span class="number">0xff00000000000000</span>,
         }
+    }
+
+    <span class="kw">pub fn </span>max_page_size(<span class="self">self</span>) -&gt; usize {
+        <span class="kw">static </span>PAGE_SIZES: [usize; <span class="number">5</span>] =
+            [<span class="number">0x1000</span>, <span class="number">0x200000</span>, <span class="number">0x40000000</span>, <span class="number">0x8000000000</span>, <span class="number">0x1000000000000</span>];
+        PAGE_SIZES[<span class="self">self</span>.max_level()]
     }
 }
 
@@ -587,6 +681,7 @@
     asid: u16,
     <span class="attr">#[allow(clippy::linkedlist)]
     </span>maps: LinkedList&lt;Mapping&gt;,
+    direct_map_base: usize,
 }
 
 <span class="doccomment">/// Allocate a new page table
@@ -637,12 +732,13 @@
 
 <span class="kw">impl </span>AddressSpace {
     <span class="doccomment">/// Create a new, empty, virtual address space
-    </span><span class="kw">pub const fn </span>new(paging_mode: PagingMode) -&gt; AddressSpace {
+    </span><span class="kw">pub const fn </span>new(paging_mode: PagingMode, direct_map_base: usize) -&gt; AddressSpace {
         <span class="self">Self </span>{
             root: <span class="number">0</span>,
             mode: paging_mode,
             asid: <span class="number">0</span>,
             maps: LinkedList::new(),
+            direct_map_base,
         }
     }
 
@@ -667,6 +763,18 @@
     </span><span class="kw">pub unsafe fn </span>switch_to(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="attr">#[cfg(target_arch = <span class="string">&quot;riscv64&quot;</span>)]
         </span><span class="macro">asm!</span>(<span class="string">&quot;csrw satp, {}&quot;</span>, <span class="kw">in</span>(reg) <span class="self">self</span>.satp(), options(nostack, preserves_flags));
+    }
+
+    <span class="kw">pub const fn </span>direct_map_base(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.direct_map_base
+    }
+
+    <span class="kw">pub fn </span>direct_map_ptr&lt;T: <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ptr: <span class="kw-2">*const </span>T) -&gt; <span class="kw-2">*const </span>T {
+        ptr.with_addr(<span class="self">self</span>.direct_map_base + ptr.addr())
+    }
+
+    <span class="kw">pub fn </span>direct_map_ptr_mut&lt;T: <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, ptr: <span class="kw-2">*mut </span>T) -&gt; <span class="kw-2">*mut </span>T {
+        ptr.with_addr(<span class="self">self</span>.direct_map_base + ptr.addr())
     }
 
     <span class="kw">pub fn </span>higher_half_start(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
@@ -918,23 +1026,15 @@
     }
 }
 
-<span class="doccomment">/// Determine the maximum supported paging mode as reported by the Device Tree
+<span class="doccomment">/// Get the system&#39;s maximum paging mode from the device tree.
 ///
 /// # Panics
 ///
-/// This function may panic if the required information is not available.
-</span><span class="kw">pub fn </span>get_max_paging_mode() -&gt; PagingMode {
+/// This function may panic if the device tree does not contain a node for the BSP or if
+/// the node does not contain an `mmu-type` property.
+</span><span class="kw">fn </span>get_max_paging_mode_fdt(fdt: <span class="kw-2">&amp;</span>::fdt::Fdt) -&gt; PagingMode {
     <span class="kw">use </span>::fdt::node::NodeProperty;
 
-    <span class="kw">static </span>MAX_PAGING_MODE: AtomicUsize = AtomicUsize::new(!<span class="number">0</span>);
-
-    <span class="kw">let </span>paging_mode = MAX_PAGING_MODE.load(Ordering::Relaxed);
-    <span class="kw">if </span>paging_mode != !<span class="number">0 </span>{
-        <span class="comment">// SAFETY: The value is only ever changed from !0 to a valid discriminant.
-        </span><span class="kw">return unsafe </span>{ core::mem::transmute(paging_mode) };
-    }
-
-    <span class="kw">let </span>fdt = fdt::get_fdt();
     <span class="kw">let </span>hartid = BOOT_HART_ID.load(Ordering::Relaxed);
 
     <span class="comment">/*
@@ -955,37 +1055,103 @@
         <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unknown mmu-type&quot;</span>),
     };
 
-    MAX_PAGING_MODE.store(paging_mode <span class="kw">as _</span>, Ordering::Relaxed);
     paging_mode
 }
 
-<span class="doccomment">/// Initialize a virtual address space with the requested paging mode
-///
-/// # Panics
-///
-/// This function will panic if the initial mappings (identity map and HHDM) cannot be created; or
-/// if `paging_mode` is not supported. Use [`get_max_paging_mode()`] to determine the maximum
-/// supported mode.
-</span><span class="kw">pub fn </span>init(paging_mode: PagingMode) -&gt; AddressSpace {
-    <span class="macro">assert!</span>(
-        paging_mode &lt;= get_max_paging_mode(),
-        <span class="string">&quot;unsupported paging mode&quot;
-    </span>);
+<span class="doccomment">/// Determine the system&#39;s maximum paging mode by trial-and-error
+</span><span class="kw">fn </span>detect_max_paging_mode() -&gt; PagingMode {
+    <span class="comment">// Writes to `satp` with an invalid MODE field have no effect.
+    // We can determine the maximum paging mode by trying to
+    // enable each mode, starting with the maximum we support (Sv57) and
+    // working our way down until we are successful.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>table = PageTable {
+        entries: [PageTableEntry(<span class="number">0</span>); <span class="number">512</span>],
+    };
+    <span class="kw">let </span><span class="kw-2">mut </span>paging_mode = PagingMode::Sv57;
+    <span class="kw">loop </span>{
+        <span class="comment">// We must guarantee that at least this code will be identity-mapped if and when
+        // we are successful. Mapping the entire lower-half hopefully does this for us.
+        //
+        // XXX: Theoretically a system could exist with RAM so high up that we cannot
+        // identity-map it into the Sv39 address space and theoretically we could be
+        // running there. Too bad, so sad.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>addr = <span class="number">0</span>;
+        <span class="kw">for </span>entry <span class="kw">in </span><span class="kw-2">&amp;mut </span>table.entries[..<span class="number">256</span>] {
+            <span class="kw-2">*</span>entry = PageTableEntry((addr &gt;&gt; <span class="number">2</span>) | <span class="number">0xf</span>);
+            addr += paging_mode.max_page_size();
+        }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>vmspace = AddressSpace::new(paging_mode);
+        <span class="kw">let </span>satp = (paging_mode <span class="kw">as </span>usize) &lt;&lt; <span class="number">60 </span>| (table.entries.as_ptr().addr() &gt;&gt; <span class="number">12</span>);
+        <span class="kw">let </span>new: usize;
+        <span class="kw">unsafe </span>{
+            <span class="macro">asm!</span>(
+                <span class="string">&quot;csrw satp, {0}&quot;</span>,
+                <span class="string">&quot;csrr {0}, satp&quot;</span>,
+                <span class="string">&quot;csrw satp, zero&quot;</span>,
+                inout(reg) satp =&gt; new,
+                options(nostack),
+            );
+        }
 
-    <span class="kw">let </span>pmap_size = cmp::max(<span class="number">0x100000000</span>, MAX_PHYS_ADDR.load(Ordering::Relaxed) + <span class="number">1</span>);
-    <span class="kw">let </span>hhdm_base = vmspace.paging_mode().higher_half_start();
+        <span class="kw">if </span>new == satp {
+            <span class="kw">break </span>paging_mode;
+        }
 
-    <span class="macro">log::info!</span>(<span class="string">&quot;initializing {:?} paging.&quot;</span>, vmspace.paging_mode());
-
-    vmspace
-        .map_pages(<span class="number">0</span>, <span class="number">0</span>, pmap_size, MapFlags::RWX | MapFlags::HUGE1G)
-        .expect(<span class="string">&quot;failed to create identity map&quot;</span>);
-    vmspace
-        .map_pages(hhdm_base, <span class="number">0</span>, pmap_size, MapFlags::RWX | MapFlags::HUGE1G)
-        .expect(<span class="string">&quot;failed to create higher-half map&quot;</span>);
-
-    vmspace
+        <span class="kw">match </span>paging_mode {
+            PagingMode::Sv57 =&gt; paging_mode = PagingMode::Sv48,
+            PagingMode::Sv48 =&gt; paging_mode = PagingMode::Sv39,
+            PagingMode::Sv39 =&gt; <span class="macro">panic!</span>(<span class="string">&quot;paging is not supported&quot;</span>),
+        }
+    }
 }
-</code></pre></div></section></main></body></html>
+
+<span class="doccomment">/// Returns the maximum paging mode supported by the system
+</span><span class="kw">pub fn </span>get_max_paging_mode() -&gt; PagingMode {
+    <span class="kw">static </span>MAX_PAGING_MODE: AtomicUsize = AtomicUsize::new(!<span class="number">0</span>);
+    <span class="kw">let </span>mode = MAX_PAGING_MODE.load(Ordering::Relaxed);
+    <span class="kw">if </span>mode != !<span class="number">0 </span>{
+        <span class="comment">// SAFETY: The value is only ever changed from !0 to a valid discriminant.
+        </span><span class="kw">return unsafe </span>{ core::mem::transmute(mode) };
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(fdt) = fdt::get_fdt() {
+        <span class="kw">let </span>mode = get_max_paging_mode_fdt(fdt);
+        MAX_PAGING_MODE.store(mode <span class="kw">as _</span>, Ordering::Relaxed);
+        <span class="kw">return </span>mode;
+    }
+
+    <span class="kw">let </span>mode = detect_max_paging_mode();
+    MAX_PAGING_MODE.store(mode <span class="kw">as _</span>, Ordering::Relaxed);
+    mode
+}
+<span class="comment">//
+// /// Initialize a virtual address space with the requested paging mode
+// ///
+// /// # Panics
+// ///
+// /// This function will panic if the initial mappings (identity map and HHDM) cannot be created; or
+// /// if `paging_mode` is not supported. Use [`get_max_paging_mode()`] to determine the maximum
+// /// supported mode.
+// pub fn init(paging_mode: PagingMode, direct_map_base: usize) -&gt; AddressSpace {
+//     assert!(
+//         paging_mode &lt;= get_max_paging_mode(),
+//         &quot;unsupported paging mode&quot;
+//     );
+//
+//     let mut vmspace = AddressSpace::new(paging_mode, direct_map_base);
+//
+//     let pmap_size = cmp::max(0x100000000, MAX_PHYS_ADDR.load(Ordering::Relaxed) + 1);
+//
+//     log::info!(&quot;initializing {:?} paging.&quot;, vmspace.paging_mode());
+//
+//     vmspace
+//         .map_pages(0, 0, pmap_size, MapFlags::RWX | MapFlags::HUGE1G)
+//         .expect(&quot;failed to create identity map&quot;);
+//     vmspace
+//         .map_pages(direct_map_base, 0, pmap_size, MapFlags::RWX | MapFlags::HUGE1G)
+//         .expect(&quot;failed to create higher-half map&quot;);
+//
+//     vmspace
+// }
+</span></code></pre></div></section></main></body></html>
