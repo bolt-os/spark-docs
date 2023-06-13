@@ -2,7 +2,6 @@ var sourcesIndex = JSON.parse('{\
 "acpi":["",[],["fadt.rs","lib.rs","madt.rs"]],\
 "anyhow":["",[],["backtrace.rs","chain.rs","context.rs","ensure.rs","error.rs","fmt.rs","kind.rs","lib.rs","macros.rs","ptr.rs","wrapper.rs"]],\
 "bitflags":["",[],["lib.rs"]],\
-"cfg_if":["",[],["lib.rs"]],\
 "elf":["",[],["dynamic.rs","lib.rs","reloc.rs","section.rs","segment.rs","symbol.rs","types.rs"]],\
 "fdt":["",[],["lib.rs","node.rs","parsing.rs","standard_nodes.rs"]],\
 "gimli":["",[["read",[],["addr.rs","aranges.rs","cfi.rs","endian_slice.rs","index.rs","lists.rs","loclists.rs","mod.rs","op.rs","reader.rs","rnglists.rs","str.rs","util.rs","value.rs"]]],["arch.rs","common.rs","constants.rs","endianity.rs","leb128.rs","lib.rs"]],\
@@ -10,7 +9,6 @@ var sourcesIndex = JSON.parse('{\
 "limine":["",[],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\
 "log":["",[],["lib.rs","macros.rs"]],\
-"memoffset":["",[],["lib.rs","offset_of.rs","raw_field.rs","span_of.rs"]],\
 "rustc_demangle":["",[],["legacy.rs","lib.rs","v0.rs"]],\
 "sbi":["",[],["base.rs","hart_state_management.rs","ipi.rs","legacy.rs","lib.rs","performance_monitoring_unit.rs","rfence.rs","system_reset.rs","timer.rs"]],\
 "scopeguard":["",[],["lib.rs"]],\

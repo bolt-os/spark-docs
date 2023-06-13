@@ -796,7 +796,6 @@
 <a href="#796" id="796">796</a>
 <a href="#797" id="797">797</a>
 <a href="#798" id="798">798</a>
-<a href="#799" id="799">799</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -838,7 +837,7 @@
     BOOT_HART_ID,
 };
 <span class="kw">use </span>alloc::ffi::CString;
-<span class="kw">use </span>core::{cmp, ffi::c_char, sync::atomic::Ordering};
+<span class="kw">use </span>core::{cmp, ffi::c_char, mem::offset_of, sync::atomic::Ordering};
 <span class="kw">use </span>elf::Elf;
 <span class="kw">use </span>limine::{
     BootTime, BootTimeRequest, BootloaderInfo, BootloaderInfoRequest, Dtb, DtbRequest,
@@ -848,7 +847,6 @@
     PagingModeResponse, PagingModeResponseFlags, Rsdp, RsdpRequest, Smbios, SmbiosRequest, Smp,
     SmpFlags, SmpInfo, SmpRequest, StackSize, StackSizeRequest, Uuid,
 };
-<span class="kw">use </span>memoffset::offset_of;
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>ConfigEntry&lt;<span class="lifetime">&#39;src</span>&gt; {

@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["acpi","anyhow","bitflags","cfg_if","elf","fdt","gimli","libsa","limine","lock_api","log","memoffset","rustc_demangle","sbi","scopeguard","spark","spin","unwinding","uuid"];
+window.ALL_CRATES = ["acpi","anyhow","bitflags","elf","fdt","gimli","libsa","limine","lock_api","log","rustc_demangle","sbi","scopeguard","spark","spin","unwinding","uuid"];
