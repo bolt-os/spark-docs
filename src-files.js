@@ -1,7 +1,7 @@
-var sourcesIndex = JSON.parse('{\
+var srcIndex = JSON.parse('{\
 "acpi":["",[],["fadt.rs","lib.rs","madt.rs"]],\
 "anyhow":["",[],["backtrace.rs","chain.rs","context.rs","ensure.rs","error.rs","fmt.rs","kind.rs","lib.rs","macros.rs","ptr.rs","wrapper.rs"]],\
-"bitflags":["",[],["lib.rs"]],\
+"bitflags":["",[],["external.rs","internal.rs","iter.rs","lib.rs","parser.rs","public.rs","traits.rs"]],\
 "elf":["",[],["dynamic.rs","lib.rs","reloc.rs","section.rs","segment.rs","symbol.rs","types.rs"]],\
 "fdt":["",[],["lib.rs","node.rs","parsing.rs","standard_nodes.rs"]],\
 "gimli":["",[["read",[],["addr.rs","aranges.rs","cfi.rs","endian_slice.rs","index.rs","lists.rs","loclists.rs","mod.rs","op.rs","reader.rs","rnglists.rs","str.rs","util.rs","value.rs"]]],["arch.rs","common.rs","constants.rs","endianity.rs","leb128.rs","lib.rs"]],\
@@ -12,9 +12,9 @@ var sourcesIndex = JSON.parse('{\
 "rustc_demangle":["",[],["legacy.rs","lib.rs","v0.rs"]],\
 "sbi":["",[],["base.rs","hart_state_management.rs","ipi.rs","legacy.rs","lib.rs","performance_monitoring_unit.rs","rfence.rs","system_reset.rs","timer.rs"]],\
 "scopeguard":["",[],["lib.rs"]],\
-"spark":["",[["dev",[["block",[["nvme",[],["controller.rs","identify.rs","mod.rs","queue.rs"]]],["mod.rs"]]],["acpi.rs","fdt.rs","mod.rs","pcie.rs"]],["fs",[["fat",[],["bpb.rs","dir.rs","mod.rs"]]],["mod.rs"]],["mem",[],["mod.rs","pmm.rs","vmm.rs"]],["proto",[],["limine.rs"]]],["config.rs","io.rs","main.rs","malloc.rs","panic.rs","proto.rs","rtld.rs","smp.rs","time.rs","trap.rs"]],\
+"spark":["",[["dev",[["block",[["nvme",[],["controller.rs","identify.rs","mod.rs","queue.rs"]]],["mod.rs"]]],["acpi.rs","fdt.rs","fw_cfg.rs","mod.rs","pcie.rs"]],["fs",[["fat",[],["bpb.rs","dir.rs","mod.rs"]]],["mod.rs"]],["mem",[],["mod.rs","pmm.rs","vmm.rs"]],["proto",[],["limine.rs"]]],["config.rs","io.rs","main.rs","malloc.rs","panic.rs","proto.rs","rtld.rs","smp.rs","time.rs","trap.rs"]],\
 "spin":["",[["mutex",[],["spin.rs"]]],["barrier.rs","lazy.rs","lib.rs","mutex.rs","once.rs","relax.rs","rwlock.rs"]],\
 "unwinding":["",[["unwinder",[["arch",[],["mod.rs","riscv64.rs"]],["find_fde",[],["fixed.rs","mod.rs"]]],["frame.rs","mod.rs"]]],["abi.rs","arch.rs","lib.rs","panic.rs","panicking.rs","personality.rs","util.rs"]],\
 "uuid":["",[],["builder.rs","error.rs","external.rs","fmt.rs","lib.rs","macros.rs","parser.rs","timestamp.rs"]]\
 }');
-createSourceSidebar();
+createSrcSidebar();

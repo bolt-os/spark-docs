@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unwinding-0.1.7/src/unwinder/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-2fcac8296ac587d8.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="unwinding" data-themes="" data-resource-suffix="" data-rustdoc-version="1.72.0-nightly (df77afbca 2023-06-12)" data-search-js="search-6ad6b976982acb3d.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-762bcae8c0777c4b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../unwinding/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unwinding-0.2.0/src/unwinder/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="unwinding" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0-nightly (439d066bc 2023-08-10)" data-channel="nightly" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../unwinding/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -416,6 +416,18 @@
 <a href="#416" id="416">416</a>
 <a href="#417" id="417">417</a>
 <a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
 </pre></div><pre class="rust"><code><span class="kw">mod </span>arch;
 <span class="kw">mod </span>find_fde;
 <span class="kw">mod </span>frame;
@@ -567,8 +579,8 @@
 
 <span class="attr">#[inline(never)]
 #[no_mangle]
-</span><span class="kw">pub extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_RaiseException(
-    exception: <span class="kw-2">&amp;mut </span>UnwindException,
+</span><span class="kw">pub unsafe extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_RaiseException(
+    exception: <span class="kw-2">*mut </span>UnwindException,
 ) -&gt; UnwindReasonCode {
     with_context(|saved_ctx| {
         <span class="comment">// Phase 1: Search for handler
@@ -577,17 +589,19 @@
         <span class="kw">loop </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = <span class="macro">try1!</span>(Frame::from_context(<span class="kw-2">&amp;</span>ctx, signal)) {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(personality) = frame.personality() {
-                    <span class="kw">let </span>result = personality(
-                        <span class="number">1</span>,
-                        UnwindAction::SEARCH_PHASE,
-                        exception.exception_class,
-                        exception,
-                        <span class="kw-2">&amp;mut </span>UnwindContext {
-                            frame: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>frame),
-                            ctx: <span class="kw-2">&amp;mut </span>ctx,
-                            signal,
-                        },
-                    );
+                    <span class="kw">let </span>result = <span class="kw">unsafe </span>{
+                        personality(
+                            <span class="number">1</span>,
+                            UnwindAction::SEARCH_PHASE,
+                            (<span class="kw-2">*</span>exception).exception_class,
+                            exception,
+                            <span class="kw-2">&amp;mut </span>UnwindContext {
+                                frame: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>frame),
+                                ctx: <span class="kw-2">&amp;mut </span>ctx,
+                                signal,
+                            },
+                        )
+                    };
 
                     <span class="kw">match </span>result {
                         UnwindReasonCode::CONTINUE_UNWIND =&gt; (),
@@ -607,8 +621,10 @@
 
         <span class="comment">// Disambiguate normal frame and signal frame.
         </span><span class="kw">let </span>handler_cfa = ctx[Arch::SP] - signal <span class="kw">as </span>usize;
-        exception.private_1 = <span class="prelude-val">None</span>;
-        exception.private_2 = handler_cfa;
+        <span class="kw">unsafe </span>{
+            (<span class="kw-2">*</span>exception).private_1 = <span class="prelude-val">None</span>;
+            (<span class="kw-2">*</span>exception).private_2 = handler_cfa;
+        }
 
         <span class="kw">let </span>code = raise_exception_phase2(exception, saved_ctx, handler_cfa);
         <span class="kw">match </span>code {
@@ -619,7 +635,7 @@
 }
 
 <span class="kw">fn </span>raise_exception_phase2(
-    exception: <span class="kw-2">&amp;mut </span>UnwindException,
+    exception: <span class="kw-2">*mut </span>UnwindException,
     ctx: <span class="kw-2">&amp;mut </span>Context,
     handler_cfa: usize,
 ) -&gt; UnwindReasonCode {
@@ -628,22 +644,24 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = <span class="macro">try2!</span>(Frame::from_context(ctx, signal)) {
             <span class="kw">let </span>frame_cfa = ctx[Arch::SP] - signal <span class="kw">as </span>usize;
             <span class="kw">if let </span><span class="prelude-val">Some</span>(personality) = frame.personality() {
-                <span class="kw">let </span>code = personality(
-                    <span class="number">1</span>,
-                    UnwindAction::CLEANUP_PHASE
-                        | <span class="kw">if </span>frame_cfa == handler_cfa {
-                            UnwindAction::HANDLER_FRAME
-                        } <span class="kw">else </span>{
-                            UnwindAction::empty()
+                <span class="kw">let </span>code = <span class="kw">unsafe </span>{
+                    personality(
+                        <span class="number">1</span>,
+                        UnwindAction::CLEANUP_PHASE
+                            | <span class="kw">if </span>frame_cfa == handler_cfa {
+                                UnwindAction::HANDLER_FRAME
+                            } <span class="kw">else </span>{
+                                UnwindAction::empty()
+                            },
+                        (<span class="kw-2">*</span>exception).exception_class,
+                        exception,
+                        <span class="kw-2">&amp;mut </span>UnwindContext {
+                            frame: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>frame),
+                            ctx,
+                            signal,
                         },
-                    exception.exception_class,
-                    exception,
-                    <span class="kw-2">&amp;mut </span>UnwindContext {
-                        frame: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>frame),
-                        ctx,
-                        signal,
-                    },
-                );
+                    )
+                };
 
                 <span class="kw">match </span>code {
                     UnwindReasonCode::CONTINUE_UNWIND =&gt; (),
@@ -665,14 +683,16 @@
 
 <span class="attr">#[inline(never)]
 #[no_mangle]
-</span><span class="kw">pub extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_ForcedUnwind(
-    exception: <span class="kw-2">&amp;mut </span>UnwindException,
+</span><span class="kw">pub unsafe extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_ForcedUnwind(
+    exception: <span class="kw-2">*mut </span>UnwindException,
     stop: UnwindStopFn,
     stop_arg: <span class="kw-2">*mut </span>c_void,
 ) -&gt; UnwindReasonCode {
     with_context(|ctx| {
-        exception.private_1 = <span class="prelude-val">Some</span>(stop);
-        exception.private_2 = stop_arg <span class="kw">as _</span>;
+        <span class="kw">unsafe </span>{
+            (<span class="kw-2">*</span>exception).private_1 = <span class="prelude-val">Some</span>(stop);
+            (<span class="kw-2">*</span>exception).private_2 = stop_arg <span class="kw">as _</span>;
+        }
 
         <span class="kw">let </span>code = force_unwind_phase2(exception, ctx, stop, stop_arg);
         <span class="kw">match </span>code {
@@ -683,7 +703,7 @@
 }
 
 <span class="kw">fn </span>force_unwind_phase2(
-    exception: <span class="kw-2">&amp;mut </span>UnwindException,
+    exception: <span class="kw-2">*mut </span>UnwindException,
     ctx: <span class="kw-2">&amp;mut </span>Context,
     stop: UnwindStopFn,
     stop_arg: <span class="kw-2">*mut </span>c_void,
@@ -692,24 +712,26 @@
     <span class="kw">loop </span>{
         <span class="kw">let </span>frame = <span class="macro">try2!</span>(Frame::from_context(ctx, signal));
 
-        <span class="kw">let </span>code = stop(
-            <span class="number">1</span>,
-            UnwindAction::FORCE_UNWIND
-                | UnwindAction::END_OF_STACK
-                | <span class="kw">if </span>frame.is_none() {
-                    UnwindAction::END_OF_STACK
-                } <span class="kw">else </span>{
-                    UnwindAction::empty()
+        <span class="kw">let </span>code = <span class="kw">unsafe </span>{
+            stop(
+                <span class="number">1</span>,
+                UnwindAction::FORCE_UNWIND
+                    | UnwindAction::END_OF_STACK
+                    | <span class="kw">if </span>frame.is_none() {
+                        UnwindAction::END_OF_STACK
+                    } <span class="kw">else </span>{
+                        UnwindAction::empty()
+                    },
+                (<span class="kw-2">*</span>exception).exception_class,
+                exception,
+                <span class="kw-2">&amp;mut </span>UnwindContext {
+                    frame: frame.as_ref(),
+                    ctx,
+                    signal,
                 },
-            exception.exception_class,
-            exception,
-            <span class="kw-2">&amp;mut </span>UnwindContext {
-                frame: frame.as_ref(),
-                ctx,
-                signal,
-            },
-            stop_arg,
-        );
+                stop_arg,
+            )
+        };
         <span class="kw">match </span>code {
             UnwindReasonCode::NO_REASON =&gt; (),
             <span class="kw">_ </span>=&gt; <span class="kw">return </span>UnwindReasonCode::FATAL_PHASE2_ERROR,
@@ -717,17 +739,19 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(frame) = frame {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(personality) = frame.personality() {
-                <span class="kw">let </span>code = personality(
-                    <span class="number">1</span>,
-                    UnwindAction::FORCE_UNWIND | UnwindAction::CLEANUP_PHASE,
-                    exception.exception_class,
-                    exception,
-                    <span class="kw-2">&amp;mut </span>UnwindContext {
-                        frame: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>frame),
-                        ctx,
-                        signal,
-                    },
-                );
+                <span class="kw">let </span>code = <span class="kw">unsafe </span>{
+                    personality(
+                        <span class="number">1</span>,
+                        UnwindAction::FORCE_UNWIND | UnwindAction::CLEANUP_PHASE,
+                        (<span class="kw-2">*</span>exception).exception_class,
+                        exception,
+                        <span class="kw-2">&amp;mut </span>UnwindContext {
+                            frame: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>frame),
+                            ctx,
+                            signal,
+                        },
+                    )
+                };
 
                 <span class="kw">match </span>code {
                     UnwindReasonCode::CONTINUE_UNWIND =&gt; (),
@@ -749,15 +773,15 @@
 
 <span class="attr">#[inline(never)]
 #[no_mangle]
-</span><span class="kw">pub extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_Resume(exception: <span class="kw-2">&amp;mut </span>UnwindException) -&gt; ! {
+</span><span class="kw">pub unsafe extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_Resume(exception: <span class="kw-2">*mut </span>UnwindException) -&gt; ! {
     with_context(|ctx| {
-        <span class="kw">let </span>code = <span class="kw">match </span>exception.private_1 {
+        <span class="kw">let </span>code = <span class="kw">match unsafe </span>{ (<span class="kw-2">*</span>exception).private_1 } {
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">let </span>handler_cfa = exception.private_2;
+                <span class="kw">let </span>handler_cfa = <span class="kw">unsafe </span>{ (<span class="kw-2">*</span>exception).private_2 };
                 raise_exception_phase2(exception, ctx, handler_cfa)
             }
             <span class="prelude-val">Some</span>(stop) =&gt; {
-                <span class="kw">let </span>stop_arg = exception.private_2 <span class="kw">as _</span>;
+                <span class="kw">let </span>stop_arg = <span class="kw">unsafe </span>{ (<span class="kw-2">*</span>exception).private_2 <span class="kw">as _ </span>};
                 force_unwind_phase2(exception, ctx, stop, stop_arg)
             }
         };
@@ -769,16 +793,16 @@
 
 <span class="attr">#[inline(never)]
 #[no_mangle]
-</span><span class="kw">pub extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_Resume_or_Rethrow(
-    exception: <span class="kw-2">&amp;mut </span>UnwindException,
+</span><span class="kw">pub unsafe extern </span><span class="string">&quot;C-unwind&quot; </span><span class="kw">fn </span>_Unwind_Resume_or_Rethrow(
+    exception: <span class="kw-2">*mut </span>UnwindException,
 ) -&gt; UnwindReasonCode {
-    <span class="kw">let </span>stop = <span class="kw">match </span>exception.private_1 {
-        <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>_Unwind_RaiseException(exception),
+    <span class="kw">let </span>stop = <span class="kw">match unsafe </span>{ (<span class="kw-2">*</span>exception).private_1 } {
+        <span class="prelude-val">None </span>=&gt; <span class="kw">return unsafe </span>{ _Unwind_RaiseException(exception) },
         <span class="prelude-val">Some</span>(v) =&gt; v,
     };
 
     with_context(|ctx| {
-        <span class="kw">let </span>stop_arg = exception.private_2 <span class="kw">as _</span>;
+        <span class="kw">let </span>stop_arg = <span class="kw">unsafe </span>{ (<span class="kw-2">*</span>exception).private_2 <span class="kw">as _ </span>};
         <span class="kw">let </span>code = force_unwind_phase2(exception, ctx, stop, stop_arg);
         <span class="macro">assert!</span>(code == UnwindReasonCode::INSTALL_CONTEXT);
 
@@ -808,7 +832,7 @@
             <span class="kw">let </span>frame = <span class="macro">try1!</span>(Frame::from_context(<span class="kw-2">&amp;</span>ctx, signal));
             <span class="kw">if </span>!skipping {
                 <span class="kw">let </span>code = trace(
-                    <span class="kw-2">&amp;mut </span>UnwindContext {
+                    <span class="kw-2">&amp;</span>UnwindContext {
                         frame: frame.as_ref(),
                         ctx: <span class="kw-2">&amp;mut </span>ctx,
                         signal,
