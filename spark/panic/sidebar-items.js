@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["register_executable","reloc_offset","rust_panic","trace_stack"],"mod":["uw"],"static":["SPARK_ELF"]};
+window.SIDEBAR_ITEMS = {"fn":["reloc_offset","rust_panic","trace_stack"],"mod":["symbol_map","uw"]};
