@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["MAGIC"],"fn":["get_symbol_map"],"static":["_DUMMY_SYMBOL_MAP"],"struct":["Symbol","SymbolMap","SymbolMapHeader","SymbolRaw"]};
+window.SIDEBAR_ITEMS = {"constant":["MAGIC"],"fn":["get_symbol_map"],"struct":["Symbol","SymbolMap","SymbolMapHeader","SymbolRaw"]};
