@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["declare","entry"],"struct":["Entry","Linkset"]};
