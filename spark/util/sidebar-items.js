@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["linkset","maybe_static_arc"]};
+window.SIDEBAR_ITEMS = {"mod":["maybe_static_arc"]};
