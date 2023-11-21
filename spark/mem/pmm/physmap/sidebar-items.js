@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["alloc_frames","free_frames","print"],"static":["PHYSMAP"],"struct":["FreeList","Region"]};
+window.SIDEBAR_ITEMS = {"fn":["alloc_frames","free_frames"],"static":["PHYSMAP"],"struct":["FreeList","Region"]};

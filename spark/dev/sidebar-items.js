@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["device_drivers","init","match_fdt_node"],"mod":["acpi","block","fdt","fw_cfg","pcie","uart"],"struct":["DeviceDriver"]};
+window.SIDEBAR_ITEMS = {"fn":["device_drivers","init"],"mod":["acpi","block","fw_cfg","pcie","uart"],"struct":["DeviceDriver"]};

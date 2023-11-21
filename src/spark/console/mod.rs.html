@@ -144,10 +144,6 @@
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
-<a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2023 xvanc and contributors
  * SPDX-License-Identifier: BSD-3-Clause
@@ -155,11 +151,7 @@
 
 </span><span class="kw">mod </span>sbi;
 
-<span class="kw">use crate</span>::{
-    dev::{<span class="self">self</span>, fdt, uart},
-    util::maybe_static_arc::MaybeStaticArc,
-};
-<span class="kw">use </span>::fdt::node::{FdtNode, NodeProperty};
+<span class="kw">use crate</span>::{dev::uart, sys::fdt, util::maybe_static_arc::MaybeStaticArc};
 <span class="kw">use </span>alloc::sync::Arc;
 <span class="kw">use </span>core::{fmt, time::Duration};
 <span class="kw">use </span>spin::Mutex;
@@ -182,7 +174,7 @@
 </span><span class="kw">pub struct </span>Driver {
     <span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
     <span class="kw">pub </span>compatible: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str],
-    <span class="kw">pub </span>init: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>FdtNode) -&gt; anyhow::Result&lt;Arc&lt;<span class="kw">dyn </span>ConsoleBackend&gt;&gt;,
+    <span class="kw">pub </span>init: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>fdt::Node) -&gt; anyhow::Result&lt;Arc&lt;<span class="kw">dyn </span>ConsoleBackend&gt;&gt;,
 }
 
 <span class="macro">linkset::declare!</span>(console_drivers: Driver);
@@ -236,22 +228,21 @@
      },
  }
 
-<span class="kw">pub fn </span>init() {
-    <span class="kw">let </span>fdt = fdt::get_fdt().unwrap();
+<span class="attr">#[cfg(sbi)]
+</span><span class="kw">pub fn </span>init() {
+    <span class="kw">let </span>fdt = fdt::get_fdt();
 
     <span class="kw">let </span>driver = <span class="lifetime">&#39;probe</span>: {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(node) = fdt
             .find_node(<span class="string">&quot;/chosen&quot;</span>)
-            .and_then(|node| node.property(<span class="string">&quot;stdout-path&quot;</span>))
-            .and_then(NodeProperty::as_str)
-            .map(|path| <span class="kw-2">&amp;</span>path[..path.as_bytes().partition_point(|b| <span class="kw-2">*</span>b != <span class="string">b&#39;:&#39;</span>)])
+            .and_then(|node| node.property_as::&lt;<span class="kw-2">&amp;</span>str&gt;(<span class="string">&quot;stdout-path&quot;</span>))
+            .map(|path| <span class="kw-2">&amp;</span>path[..path.find(<span class="string">&#39;:&#39;</span>).unwrap_or(path.len())])
             .and_then(|path| fdt.find_node(path))
         {
-            <span class="kw">for </span>driver <span class="kw">in </span>console_drivers
-                .as_slice()
-                .iter()
-                .filter(|driver| dev::match_fdt_node(<span class="kw-2">&amp;</span>node, driver.compatible))
-            {
+            <span class="kw">for </span>driver <span class="kw">in </span>console_drivers.as_slice() {
+                <span class="kw">if </span>!node.is_compatible_any(driver.compatible) {
+                    <span class="kw">continue</span>;
+                }
                 <span class="kw">let </span>backend = <span class="kw">match </span>(driver.init)(<span class="kw-2">&amp;</span>node) {
                     <span class="prelude-val">Ok</span>(backend) =&gt; backend,
                     <span class="prelude-val">Err</span>(error) =&gt; {
@@ -263,20 +254,21 @@
             }
         }
 
-        <span class="kw">for </span>node <span class="kw">in </span>fdt.all_nodes() {
-            <span class="kw">let </span>enabled = node
-                .property(<span class="string">&quot;status&quot;</span>)
-                .and_then(NodeProperty::as_str)
-                .map_or(<span class="bool-val">true</span>, |status| <span class="macro">matches!</span>(status, <span class="string">&quot;ok&quot; </span>| <span class="string">&quot;okay&quot;</span>));
-            <span class="kw">if </span>!enabled {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(nodes) = fdt.find_node(<span class="string">&quot;/soc&quot;</span>).map(|node| node.children()) <span class="kw">else </span>{
+            <span class="comment">// No console found.
+            </span><span class="macro">println!</span>(<span class="string">&quot;no /soc&quot;</span>);
+            <span class="kw">return</span>;
+        };
+
+        <span class="kw">for </span>node <span class="kw">in </span>nodes {
+            <span class="kw">if </span>!node.is_enabled() {
                 <span class="kw">continue</span>;
             }
 
-            <span class="kw">for </span>driver <span class="kw">in </span>console_drivers
-                .as_slice()
-                .iter()
-                .filter(|driver| dev::match_fdt_node(<span class="kw-2">&amp;</span>node, driver.compatible))
-            {
+            <span class="kw">for </span>driver <span class="kw">in </span>console_drivers.as_slice() {
+                <span class="kw">if </span>!node.is_compatible_any(driver.compatible) {
+                    <span class="kw">continue</span>;
+                }
                 <span class="kw">let </span>backend = <span class="kw">match </span>(driver.init)(<span class="kw-2">&amp;</span>node) {
                     <span class="prelude-val">Ok</span>(backend) =&gt; backend,
                     <span class="prelude-val">Err</span>(error) =&gt; {

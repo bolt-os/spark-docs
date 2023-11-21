@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["FdtError"],"mod":["node","standard_nodes"],"struct":["Fdt"]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"mod":["node","parser","prop"],"struct":["Fdt","FdtHeader","MemoryReservation"],"type":["Cell","Result"]};

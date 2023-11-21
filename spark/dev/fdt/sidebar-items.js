@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["get_fdt","init"],"static":["DTB_PTR","FDT"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["generate_limine_memory_map","init_from_fdt"],"mod":["physmap","ranges"],"static":["MAX_PHYS_ADDR"]};
+window.SIDEBAR_ITEMS = {"fn":["generate_limine_memory_map","init"],"mod":["physmap","ranges"],"static":["MAX_PHYS_ADDR"]};

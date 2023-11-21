@@ -145,10 +145,6 @@
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -181,13 +177,12 @@
 
 </span><span class="kw">pub mod </span>acpi;
 <span class="kw">pub mod </span>block;
-<span class="kw">pub mod </span>fdt;
 <span class="kw">pub mod </span>fw_cfg;
 <span class="kw">pub mod </span>pcie;
 <span class="kw">pub mod </span>uart;
 
 <span class="attr">#[cfg(sbi)]
-</span><span class="kw">use </span>{::fdt <span class="kw">as </span>libfdt, core::mem::size_of, libsa::extern_sym};
+</span><span class="kw">use </span>{<span class="kw">crate</span>::sys::fdt, core::mem::size_of, libsa::extern_sym};
 <span class="attr">#[cfg(uefi)]
 </span><span class="kw">use </span>{core::fmt, spin::Mutex, uefi::proto::Proto};
 
@@ -196,7 +191,7 @@
     <span class="kw">pub </span>name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
     <span class="attr">#[cfg(all(sbi, feature = <span class="string">&quot;dev-pcie&quot;</span>))]
     </span><span class="kw">pub </span>probe_pci: <span class="prelude-ty">Option</span>&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;</span>pcie::Device) -&gt; <span class="kw">crate</span>::Result&lt;()&gt;&gt;,
-    <span class="kw">pub </span>probe_fdt: <span class="prelude-ty">Option</span>&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;</span>libfdt::node::FdtNode) -&gt; <span class="kw">crate</span>::Result&lt;()&gt;&gt;,
+    <span class="kw">pub </span>probe_fdt: <span class="prelude-ty">Option</span>&lt;<span class="kw">fn</span>(<span class="kw-2">&amp;</span>fdt::Node) -&gt; <span class="kw">crate</span>::Result&lt;()&gt;&gt;,
 }
 
 <span class="attr">#[cfg(sbi)]
@@ -209,19 +204,15 @@
 }
 
 <span class="attr">#[cfg(sbi)]
-</span><span class="kw">pub fn </span>match_fdt_node(node: <span class="kw-2">&amp;</span>libfdt::node::FdtNode, matches: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]) -&gt; bool {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(compat) = node.compatible() {
-        compat.all().any(|c| matches.contains(<span class="kw-2">&amp;</span>c))
-    } <span class="kw">else </span>{
-        <span class="bool-val">false
-    </span>}
-}
-
-<span class="attr">#[cfg(sbi)]
 </span><span class="kw">pub fn </span>init() {
-    <span class="kw">let </span><span class="prelude-val">Some</span>(fdt) = fdt::get_fdt() <span class="kw">else </span>{ <span class="kw">return </span>};
+    <span class="kw">let </span>fdt = fdt::get_fdt();
     <span class="macro">log::debug!</span>(<span class="string">&quot;scanning device tree&quot;</span>);
-    <span class="kw">for </span>node <span class="kw">in </span>fdt.all_nodes() {
+
+    <span class="kw">let </span><span class="prelude-val">Some</span>(soc_node) = fdt.find_node(<span class="string">&quot;/soc&quot;</span>) <span class="kw">else </span>{
+        <span class="macro">log::error!</span>(<span class="string">&quot;device tree missing `/soc` node&quot;</span>);
+        <span class="kw">return</span>;
+    };
+    <span class="kw">for </span>node <span class="kw">in </span>soc_node.children() {
         <span class="kw">for </span>driver <span class="kw">in </span>device_drivers() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(init) = driver.probe_fdt {
                 <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = init(<span class="kw-2">&amp;</span>node) {
@@ -274,6 +265,7 @@
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>UefiBlockDevice {}
 
 <span class="attr">#[cfg(uefi)]
+#[allow(clippy::missing_fields_in_debug)]
 </span><span class="kw">impl </span>fmt::Debug <span class="kw">for </span>UefiBlockDevice {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         f.debug_struct(<span class="string">&quot;UefiBlockDevice&quot;</span>)

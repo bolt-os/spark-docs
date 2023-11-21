@@ -362,6 +362,9 @@
 <a href="#362" id="362">362</a>
 <a href="#363" id="363">363</a>
 <a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -419,7 +422,7 @@
 </span>)]
 #![reexport_test_harness_main = <span class="string">&quot;test_main&quot;</span>]
 #![test_runner(test::runner)]
-#![warn(clippy::cargo, clippy::pedantic)]
+#![warn(clippy::pedantic)]
 #![deny(
     clippy::semicolon_if_nothing_returned,
     clippy::debug_assert_with_mut_call
@@ -471,6 +474,7 @@
 <span class="kw">mod </span>proto;
 <span class="kw">mod </span>rtld;
 <span class="kw">mod </span>smp;
+<span class="kw">mod </span>sys;
 <span class="kw">mod </span>test;
 <span class="kw">mod </span>time;
 <span class="kw">mod </span>trap;
@@ -481,6 +485,8 @@
 
 <span class="kw">use </span>config::Value;
 <span class="kw">use </span>core::sync::atomic::{AtomicUsize, Ordering};
+<span class="attr">#[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
+</span><span class="kw">use </span>sys::fdt;
 <span class="attr">#[cfg(uefi)]
 </span><span class="kw">use </span>uefi::{
     proto::riscv::RiscvBoot,
@@ -524,6 +530,7 @@
     <span class="kw">unsafe </span>{ uefi::bootstrap(image, system_table) };
 
     io::init();
+    <span class="macro">println!</span>();
 
     <span class="comment">// Print the address we&#39;ve been loaded to for easier debugging.
     </span><span class="kw">let </span>image_base: usize;
@@ -552,7 +559,7 @@
     }
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(ptr) = config_table.get_table(TableGuid::DEVICE_TREE) {
-        dev::fdt::init(ptr.cast());
+        <span class="kw">unsafe </span>{ fdt::init(ptr.cast()) };
     }
 
     dev::init();
@@ -571,12 +578,16 @@
     BOOT_HART_ID.store(hartid, Ordering::Relaxed);
 
     <span class="comment">// Install the Device Tree
-    </span><span class="kw">let </span>fdt = dev::fdt::init(dtb_ptr);
+    </span><span class="kw">let </span>fdt = <span class="kw">unsafe </span>{ fdt::init(dtb_ptr) };
 
-    <span class="comment">// TODO: the platform stuff in `fdt::init()` should be pulled out
+    <span class="kw">let </span><span class="prelude-val">Some</span>(timebase_freq) = fdt.property_as::&lt;u32&gt;(<span class="string">&quot;/cpus/timebase-frequency&quot;</span>) <span class="kw">else </span>{
+        <span class="macro">log::error!</span>(<span class="string">&quot;device tree missing `/cpus/timebase-frequency` property&quot;</span>);
+        hcf();
+    };
+    time::init(timebase_freq <span class="kw">as </span>u64);
 
-    // Bootstrap memory allocation
-    </span>pmm::init_from_fdt(fdt, dtb_ptr);
+    <span class="comment">// Bootstrap memory allocation
+    </span>pmm::init();
 
     console::init();
 
@@ -645,7 +656,7 @@
 <span class="attr">#[allow(dead_code)]
 #[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
 </span><span class="kw">fn </span>print_fdt(fdt: <span class="kw-2">&amp;</span>fdt::Fdt) {
-    <span class="kw">fn </span>print_fdt_node(node: <span class="kw-2">&amp;</span>fdt::node::FdtNode, depth: <span class="kw-2">&amp;mut </span>usize) {
+    <span class="kw">fn </span>print_fdt_node(node: <span class="kw-2">&amp;</span>fdt::Node, depth: <span class="kw-2">&amp;mut </span>usize) {
         (<span class="number">0</span>..<span class="kw-2">*</span>depth).for_each(|<span class="kw">_</span>| <span class="macro">print!</span>(<span class="string">&quot;    &quot;</span>));
         <span class="macro">println!</span>(<span class="string">&quot;{} {{&quot;</span>, node.name);
         <span class="kw-2">*</span>depth += <span class="number">1</span>;
@@ -653,6 +664,12 @@
             (<span class="number">0</span>..<span class="kw-2">*</span>depth).for_each(|<span class="kw">_</span>| <span class="macro">print!</span>(<span class="string">&quot;    &quot;</span>));
 
             <span class="macro">print!</span>(<span class="string">&quot;{}&quot;</span>, prop.name);
+            <span class="kw">if </span>prop.is_empty() {
+                <span class="macro">println!</span>(<span class="string">&quot;;&quot;</span>);
+                <span class="kw">continue</span>;
+            }
+            <span class="macro">print!</span>(<span class="string">&quot; = &quot;</span>);
+
             <span class="kw">match </span>prop.name {
                 <span class="comment">//                 &quot;interrupt-map&quot;
                 //                     if node
@@ -681,36 +698,25 @@
                 //                     }
                 //                 }
                 </span><span class="string">&quot;compatible&quot; </span>=&gt; {
-                    <span class="macro">println!</span>(
-                        <span class="string">&quot; = {};&quot;</span>,
-                        node.compatible()
-                            .unwrap()
-                            .all()
-                            .map(|c| <span class="macro">format!</span>(<span class="string">&quot;{c:?}&quot;</span>))
-                            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-                            .join(<span class="string">&quot;, &quot;</span>)
-                    );
+                    <span class="kw">for </span>(n, s) <span class="kw">in </span>prop.string_list().unwrap().enumerate() {
+                        <span class="kw">if </span>n &gt; <span class="number">0 </span>{
+                            <span class="macro">print!</span>(<span class="string">&quot;, &quot;</span>);
+                        }
+                        <span class="macro">print!</span>(<span class="string">&quot;{s:?}&quot;</span>);
+                    }
+                    <span class="macro">println!</span>(<span class="string">&quot;;&quot;</span>);
                 }
                 <span class="string">&quot;stdout-path&quot; </span>| <span class="string">&quot;riscv,isa&quot; </span>| <span class="string">&quot;status&quot; </span>| <span class="string">&quot;mmu-type&quot; </span>| <span class="string">&quot;model&quot; </span>| <span class="string">&quot;device_type&quot; </span>=&gt; {
-                    <span class="macro">println!</span>(<span class="string">&quot; = {};&quot;</span>, prop.as_str().unwrap());
+                    <span class="macro">println!</span>(<span class="string">&quot;{};&quot;</span>, prop.string().unwrap());
                 }
                 <span class="kw">_ </span>=&gt; {
-                    <span class="kw">if </span>prop.value.is_empty() {
-                        <span class="macro">println!</span>(<span class="string">&quot;;&quot;</span>);
-                        <span class="kw">continue</span>;
-                    }
-                    <span class="macro">print!</span>(<span class="string">&quot; = &lt;&quot;</span>);
-                    <span class="kw">let </span><span class="kw-2">mut </span>first = <span class="bool-val">true</span>;
-                    prop.value.chunks_exact(<span class="number">4</span>).for_each(|c| {
-                        <span class="kw">if </span>!first {
-                            <span class="macro">print!</span>(<span class="string">&quot; &quot;</span>);
+                    <span class="macro">print!</span>(<span class="string">&quot;&lt;&quot;</span>);
+                    <span class="kw">for </span>(n, cell) <span class="kw">in </span>prop.as_cell_slice().iter().enumerate() {
+                        <span class="kw">if </span>n &gt; <span class="number">0 </span>{
+                            <span class="macro">print!</span>(<span class="string">&quot;, &quot;</span>);
                         }
-                        first = <span class="bool-val">false</span>;
-                        <span class="macro">print!</span>(
-                            <span class="string">&quot;{:#010x}&quot;</span>,
-                            u32::from_be_bytes(&lt;[u8; <span class="number">4</span>]&gt;::try_from(c).unwrap())
-                        );
-                    });
+                        <span class="macro">print!</span>(<span class="string">&quot;{cell:#0110x}&quot;</span>);
+                    }
                     <span class="macro">println!</span>(<span class="string">&quot;&gt;;&quot;</span>);
                 }
             }
@@ -722,7 +728,7 @@
         (<span class="number">0</span>..<span class="kw-2">*</span>depth).for_each(|<span class="kw">_</span>| <span class="macro">print!</span>(<span class="string">&quot;    &quot;</span>));
         <span class="macro">println!</span>(<span class="string">&quot;}};&quot;</span>);
     }
-    <span class="kw">let </span>root = fdt.all_nodes().next().unwrap();
+    <span class="kw">let </span>root = fdt.root();
     <span class="kw">let </span><span class="kw-2">mut </span>depth = <span class="number">0</span>;
     print_fdt_node(<span class="kw-2">&amp;</span>root, <span class="kw-2">&amp;mut </span>depth);
 }

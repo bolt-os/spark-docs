@@ -643,19 +643,6 @@
 <a href="#643" id="643">643</a>
 <a href="#644" id="644">644</a>
 <a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -690,9 +677,8 @@
 <span class="kw">use </span>core::sync::atomic::{AtomicUsize, Ordering};
 <span class="attr">#[cfg(sbi)]
 </span><span class="kw">use </span>{
-    <span class="kw">crate</span>::{page_align_down, page_align_up, pages_for, size_of},
-    <span class="comment">// core::,
-    </span>libsa::extern_sym,
+    <span class="kw">crate</span>::{page_align_down, page_align_up, pages_for, size_of, sys::fdt},
+    libsa::extern_sym,
 };
 
 <span class="attr">#[cfg(sbi)]
@@ -993,24 +979,24 @@
         PHYSMAP.lock().insert_region(base, num_frames);
     }
 
-    <span class="doccomment">/// Prints the current list of free physical frames
-    </span><span class="kw">pub fn </span>print() {
-        <span class="kw">let </span>physmap = PHYSMAP.lock();
-        <span class="kw">let </span><span class="kw-2">mut </span>region = physmap.head;
-        <span class="kw">unsafe </span>{
-            <span class="kw">while </span>!region.is_null() {
-                <span class="macro">println!</span>(
-                    <span class="string">&quot;  {:#018x} -&gt; {:#018x}, {} pages&quot;</span>,
-                    (<span class="kw-2">*</span>region).base,
-                    (<span class="kw-2">*</span>region).end(),
-                    (<span class="kw-2">*</span>region).num_frames
-                );
-                region = (<span class="kw-2">*</span>region).next;
-            }
-        }
-    }
+    <span class="comment">// /// Prints the current list of free physical frames
+    // pub fn print() {
+    //     let physmap = PHYSMAP.lock();
+    //     let mut region = physmap.head;
+    //     unsafe {
+    //         while !region.is_null() {
+    //             println!(
+    //                 &quot;  {:#018x} -&gt; {:#018x}, {} pages&quot;,
+    //                 (*region).base,
+    //                 (*region).end(),
+    //                 (*region).num_frames
+    //             );
+    //             region = (*region).next;
+    //         }
+    //     }
+    // }
 
-    <span class="comment">// /// Allocate frames of physical memory aligned to a specific boundary
+    // /// Allocate frames of physical memory aligned to a specific boundary
     // ///
     // /// # Panics
     // ///
@@ -1248,66 +1234,54 @@
 }
 
 <span class="doccomment">/// Initialize the physical memory allocator from the information in the Device Tree
-</span><span class="attr">#[cfg(all(not(uefi), feature = <span class="string">&quot;fdt&quot;</span>))]
-</span><span class="kw">pub fn </span>init_from_fdt(fdt: <span class="kw-2">&amp;</span>fdt::Fdt, dtb_ptr: <span class="kw-2">*const </span>u8) {
-    <span class="kw">let </span><span class="kw-2">mut </span>initmap = ranges::InitRanges::new();
+</span><span class="attr">#[cfg(sbi)]
+</span><span class="kw">pub fn </span>init() {
+    <span class="kw">let </span><span class="kw-2">mut </span>init_ranges = ranges::InitRanges::new();
     <span class="kw">let </span><span class="kw-2">mut </span>max_phys_addr = <span class="number">0</span>;
 
-    <span class="kw">for </span>node <span class="kw">in </span>fdt.find_all_nodes(<span class="string">&quot;/memory&quot;</span>) {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(regions) = node.reg() {
-            <span class="kw">for </span>region <span class="kw">in </span>regions {
-                <span class="kw">let </span>base = region.starting_address <span class="kw">as </span>usize;
-                <span class="kw">let </span>size = region.size.unwrap_or_default();
+    <span class="kw">let </span>fdt = fdt::get_fdt();
 
-                <span class="kw">let </span>end = base + size - <span class="number">1</span>;
-                <span class="kw">if </span>end &gt; max_phys_addr {
-                    max_phys_addr = end;
-                }
-
-                initmap.insert(base, size);
-            }
+    <span class="comment">// Add all `/memory*` nodes.
+    </span><span class="kw">for </span>node <span class="kw">in </span>fdt
+        .root()
+        .children()
+        .filter(|node| node.name.starts_with(<span class="string">&quot;memory&quot;</span>))
+    {
+        <span class="kw">for </span>reg <span class="kw">in </span>node.reg().into_iter().flatten().filter_map(Result::ok) {
+            <span class="kw">let </span>end = reg.addr + reg.size;
+            max_phys_addr = max_phys_addr.max(end <span class="kw">as </span>usize);
+            init_ranges.insert(reg.addr <span class="kw">as </span>usize, reg.size <span class="kw">as </span>usize);
         }
     }
 
     MAX_PHYS_ADDR.store(max_phys_addr, Ordering::Relaxed);
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(reserved_memory_node) = fdt.find_node(<span class="string">&quot;/reserved-memory&quot;</span>) {
-        <span class="kw">for </span>node <span class="kw">in </span>reserved_memory_node.children() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(regions) = node.reg() {
-                <span class="kw">for </span>region <span class="kw">in </span>regions {
-                    <span class="kw">let </span>base = region.starting_address <span class="kw">as </span>usize;
-                    <span class="kw">let </span>size = region.size.unwrap_or_default();
-
-                    <span class="kw">let </span>end = base + size - <span class="number">1</span>;
-                    <span class="kw">if </span>end &gt; MAX_PHYS_ADDR.load(Ordering::Relaxed) {
-                        MAX_PHYS_ADDR.store(end, Ordering::Relaxed);
-                    }
-
-                    initmap.remove(base, size);
-                }
-            }
+    <span class="comment">// Remove all `/reserved-memory` nodes.
+    </span><span class="kw">for </span>node <span class="kw">in </span>fdt
+        .find_node(<span class="string">&quot;/reserved-memory&quot;</span>)
+        .into_iter()
+        .flat_map(|node| node.children())
+    {
+        <span class="kw">for </span>reg <span class="kw">in </span>node.reg().into_iter().flatten().filter_map(Result::ok) {
+            init_ranges.remove(reg.addr <span class="kw">as </span>usize, reg.size <span class="kw">as </span>usize);
         }
     }
 
-    <span class="kw">for </span>region <span class="kw">in </span>fdt.memory_reservations() {
-        <span class="kw">let </span>base = region.address() <span class="kw">as </span>usize;
-        <span class="kw">let </span>size = region.size();
-
-        <span class="kw">let </span>end = base + size - <span class="number">1</span>;
-        <span class="kw">if </span>end &gt; MAX_PHYS_ADDR.load(Ordering::Relaxed) {
-            MAX_PHYS_ADDR.store(end, Ordering::Relaxed);
-        }
-
-        initmap.remove(base, size);
+    <span class="comment">// Remove all entries in the memory reservation block.
+    </span><span class="kw">for </span>entry <span class="kw">in </span>fdt.memory_reservations {
+        init_ranges.remove(entry.addr.get() <span class="kw">as </span>usize, entry.size.get() <span class="kw">as </span>usize);
     }
 
-    initmap.remove(dtb_ptr <span class="kw">as _</span>, fdt.total_size());
+    <span class="comment">// Remove the DTB.
+    </span>init_ranges.remove(fdt.as_ptr().addr(), fdt.total_size());
 
-    <span class="kw">let </span>spark_start = <span class="macro">extern_sym!</span>(__spark_start).addr();
-    <span class="kw">let </span>spark_size = <span class="macro">extern_sym!</span>(__spark_end).addr() - spark_start;
-    initmap.remove(spark_start, spark_size);
+    <span class="comment">// Remove the bootloader itself.
+    </span><span class="kw">let </span>spark_start = <span class="macro">extern_sym!</span>(__image_base).addr();
+    <span class="kw">let </span>spark_size = <span class="macro">extern_sym!</span>(__image_size).addr();
+    init_ranges.remove(spark_start, spark_size);
 
-    <span class="kw">for </span>range <span class="kw">in </span>initmap.ranges() {
+    <span class="comment">// Initialize PMM.
+    </span><span class="kw">for </span>range <span class="kw">in </span>init_ranges.ranges() {
         <span class="kw">let </span>start = <span class="macro">page_align_up!</span>(range.start());
         <span class="kw">let </span>size = <span class="macro">page_align_down!</span>(range.end() - <span class="number">1</span>) - start;
 

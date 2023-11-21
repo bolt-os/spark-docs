@@ -233,16 +233,6 @@
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2023 xvanc and contributors
  * SPDX-License-Identifier: BSD-3-Clause
@@ -254,9 +244,8 @@
     time::Timeout,
 };
 <span class="kw">use </span>alloc::sync::Arc;
-<span class="kw">use </span>anyhow::anyhow;
+<span class="kw">use </span>anyhow::{anyhow, Context};
 <span class="kw">use </span>core::time::Duration;
-<span class="kw">use </span>fdt::node::{FdtNode, NodeProperty};
 
 <span class="macro">bitflags::bitflags! </span>{
     <span class="attr">#[repr(transparent)]
@@ -461,27 +450,18 @@
     init: init_fdt,
 });
 
-<span class="kw">fn </span>init_fdt(node: <span class="kw-2">&amp;</span>FdtNode) -&gt; <span class="kw">crate</span>::Result&lt;Arc&lt;<span class="kw">dyn </span>ConsoleBackend&gt;&gt; {
-    <span class="kw">let </span>base = node
-        .reg()
-        .and_then(|<span class="kw-2">mut </span>i| i.next())
-        .ok_or(<span class="macro">anyhow!</span>(<span class="string">&quot;no `reg`&quot;</span>))<span class="question-mark">?
-        </span>.starting_address
-        .cast_mut();
-    <span class="kw">let </span>width = node
-        .property(<span class="string">&quot;reg-io-width&quot;</span>)
-        .and_then(NodeProperty::as_usize)
-        .unwrap_or(<span class="number">1</span>) <span class="kw">as </span>u32;
+<span class="kw">fn </span>init_fdt(node: <span class="kw-2">&amp;</span>fdt::Node) -&gt; anyhow::Result&lt;Arc&lt;<span class="kw">dyn </span>ConsoleBackend&gt;&gt; {
+    <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, node.path());
+    <span class="kw">let </span>reg = node.reg_by_index(<span class="number">0</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>width = node.try_property_as::&lt;u32&gt;(<span class="string">&quot;reg-io-width&quot;</span>)<span class="question-mark">?</span>.unwrap_or(<span class="number">1</span>);
     <span class="kw">let </span>shift = node
-        .property(<span class="string">&quot;reg-shift&quot;</span>)
-        .and_then(NodeProperty::as_usize)
-        .unwrap_or_default() <span class="kw">as </span>u32;
+        .try_property_as::&lt;u32&gt;(<span class="string">&quot;reg-shift&quot;</span>)<span class="question-mark">?
+        </span>.unwrap_or_default();
     <span class="kw">let </span>baud_freq = node
-        .property(<span class="string">&quot;clock-frequency&quot;</span>)
-        .and_then(NodeProperty::as_usize)
-        .unwrap_or_default() <span class="kw">as </span>u32;
+        .try_property_as::&lt;u32&gt;(<span class="string">&quot;clock-frequency&quot;</span>)<span class="question-mark">?
+        </span>.with_context(|| <span class="macro">anyhow!</span>(<span class="string">&quot;missing `clock-frequency` property&quot;</span>))<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>ba = BusAccess::new(base, width <span class="kw">as </span>u8, shift <span class="kw">as </span>u8);
+    <span class="kw">let </span>ba = BusAccess::new(reg.addr <span class="kw">as </span><span class="kw-2">*mut </span>u8, width <span class="kw">as </span>u8, shift <span class="kw">as </span>u8);
     <span class="kw">let </span><span class="kw-2">mut </span>uart = Uart::new(ba, baud_freq);
 
     uart.initialize(Baud::B115200)<span class="question-mark">?</span>;

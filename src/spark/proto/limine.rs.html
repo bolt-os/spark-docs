@@ -793,6 +793,9 @@
 <a href="#793" id="793">793</a>
 <a href="#794" id="794">794</a>
 <a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -823,9 +826,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-</span><span class="kw">use crate</span>::{
+</span><span class="attr">#[cfg(uefi)]
+</span><span class="kw">use </span><span class="kw">crate</span>::dev;
+<span class="attr">#[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::sys::fdt;
+<span class="kw">use crate</span>::{
     config::{Entry, Value},
-    dev,
     fs::File,
     pmm::{<span class="self">self</span>, MAX_PHYS_ADDR},
     rtld::Rtld,
@@ -1166,10 +1172,10 @@
     }
 
     <span class="comment">// Device Tree
+    </span><span class="attr">#[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(req) = requests.device_tree {
-        <span class="kw">let </span>dtb = dev::fdt::DTB_PTR.load(Ordering::Relaxed);
-        <span class="kw">if </span>!dtb.is_null() {
-            <span class="kw">let </span>resp = Dtb::new(vmspace.direct_map_ptr_mut(dtb));
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(fdt) = fdt::try_get_fdt() {
+            <span class="kw">let </span>resp = Dtb::new(vmspace.direct_map_ptr_mut(fdt.as_ptr().cast_mut()));
             <span class="kw">unsafe </span>{ req.set_response(leak_hhdm(<span class="kw-2">&amp;</span>vmspace, resp)) };
         }
     }

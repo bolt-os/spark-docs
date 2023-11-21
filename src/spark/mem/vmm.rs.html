@@ -577,6 +577,10 @@
 <a href="#577" id="577">577</a>
 <a href="#578" id="578">578</a>
 <a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -608,7 +612,6 @@
  */
 
 </span><span class="kw">use crate</span>::{
-    dev::fdt,
     pages_for,
     pmm::{<span class="self">self</span>},
     BOOT_HART_ID,
@@ -1034,8 +1037,9 @@
 ///
 /// This function may panic if the device tree does not contain a node for the BSP or if
 /// the node does not contain an `mmu-type` property.
-</span><span class="kw">fn </span>get_max_paging_mode_fdt(fdt: <span class="kw-2">&amp;</span>::fdt::Fdt) -&gt; PagingMode {
-    <span class="kw">use </span>::fdt::node::NodeProperty;
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
+</span><span class="kw">fn </span>get_max_paging_mode_fdt() -&gt; <span class="prelude-ty">Option</span>&lt;PagingMode&gt; {
+    <span class="kw">use </span><span class="kw">crate</span>::sys::fdt;
 
     <span class="kw">let </span>hartid = BOOT_HART_ID.load(Ordering::Relaxed);
 
@@ -1043,21 +1047,26 @@
      * Determine the paging mode supported by the BSP, we assumme the
      * other cores we&#39;re interested in will support the same.
      */
-    </span><span class="kw">let </span>paging_mode = <span class="kw">match </span>fdt
-        .find_all_nodes(<span class="string">&quot;/cpus/cpu&quot;</span>)
-        .find(|node| node.property(<span class="string">&quot;reg&quot;</span>).and_then(NodeProperty::as_usize) == <span class="prelude-val">Some</span>(hartid))
-        .expect(<span class="string">&quot;no matching FDT node for the BSP??&quot;</span>)
-        .property(<span class="string">&quot;mmu-type&quot;</span>)
-        .and_then(NodeProperty::as_str)
-        .expect(<span class="string">&quot;BSP has no `mmu-type` property&quot;</span>)
-    {
-        <span class="string">&quot;riscv,sv39&quot; </span>=&gt; PagingMode::Sv39,
-        <span class="string">&quot;riscv,sv48&quot; </span>=&gt; PagingMode::Sv48,
-        <span class="string">&quot;riscv,sv57&quot; </span>=&gt; PagingMode::Sv57,
-        <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unknown mmu-type&quot;</span>),
+    </span><span class="kw">let </span>fdt = fdt::try_get_fdt()<span class="question-mark">?</span>;
+
+    <span class="kw">let </span><span class="prelude-val">Some</span>(bsp_node) = fdt.cpus().find(|node| {
+        <span class="macro">matches!</span>(node.reg_by_index(<span class="number">0</span>),
+            <span class="prelude-val">Ok</span>(reg) <span class="kw">if </span>reg. addr <span class="kw">as </span>usize == hartid
+        )
+    }) <span class="kw">else </span>{
+        <span class="macro">log::error!</span>(<span class="string">&quot;can&#39;t find `/cpus` node for the bsp&quot;</span>);
+        <span class="kw">return </span><span class="prelude-val">None</span>;
     };
 
-    paging_mode
+    <span class="kw">match </span>bsp_node.try_property_as::&lt;<span class="kw-2">&amp;</span>str&gt;(<span class="string">&quot;mmu-type&quot;</span>).ok()<span class="question-mark">?? </span>{
+        <span class="string">&quot;riscv,sv39&quot; </span>=&gt; <span class="prelude-val">Some</span>(PagingMode::Sv39),
+        <span class="string">&quot;riscv,sv48&quot; </span>=&gt; <span class="prelude-val">Some</span>(PagingMode::Sv48),
+        <span class="string">&quot;riscv,sv57&quot; </span>=&gt; <span class="prelude-val">Some</span>(PagingMode::Sv57),
+        <span class="kw">_ </span>=&gt; {
+            <span class="macro">log::error!</span>(<span class="string">&quot;{}: missing `mmu-type` property&quot;</span>, bsp_node.path());
+            <span class="prelude-val">None
+        </span>}
+    }
 }
 
 <span class="doccomment">/// Determine the system&#39;s maximum paging mode by trial-and-error
@@ -1117,8 +1126,7 @@
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;fdt&quot;</span>)]
-    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(fdt) = fdt::get_fdt() {
-        <span class="kw">let </span>mode = get_max_paging_mode_fdt(fdt);
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(mode) = get_max_paging_mode_fdt() {
         MAX_PAGING_MODE.store(mode <span class="kw">as _</span>, Ordering::Relaxed);
         <span class="kw">return </span>mode;
     }
