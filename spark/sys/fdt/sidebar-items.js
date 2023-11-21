@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["get_fdt","init","try_get_fdt"],"mod":["node","parser","prop"],"static":["FDT"],"struct":["Fdt","FdtHeader","MemoryReservation","Node","Prop","PropParser"],"trait":["NodeExt","Parse"],"type":["Cell","Result"]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["get_fdt","init","print_fdt","try_get_fdt"],"mod":["node","parser","prop"],"static":["FDT"],"struct":["Fdt","FdtHeader","MemoryReservation","Node","Prop","PropParser"],"trait":["NodeExt","Parse"],"type":["Cell","Result"]};

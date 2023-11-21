@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["fdt"]};
+window.SIDEBAR_ITEMS = {"mod":["fdt","sbi","uefi"]};
