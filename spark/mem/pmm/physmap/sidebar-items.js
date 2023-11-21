@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["alloc_frames","free_frames"],"static":["PHYSMAP"],"struct":["FreeList","Region"]};

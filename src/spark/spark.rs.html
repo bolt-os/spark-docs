@@ -365,6 +365,7 @@
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
 </pre></div><pre class="rust"><code><span class="comment">/*
  * Copyright (c) 2022 xvanc and contributors
  *
@@ -401,7 +402,8 @@
 #![feature(
     custom_test_frameworks,
     prelude_import,
-    array_windows,                      <span class="comment">// https://github.com/rust-lang/rust/issues/75027
+    arbitrary_self_types,               <span class="comment">// https://github.com/rust-lang/rust/issues/44874
+    </span>array_windows,                      <span class="comment">// https://github.com/rust-lang/rust/issues/75027
     </span>asm_const,                          <span class="comment">// https://github.com/rust-lang/rust/issues/93332
     </span>const_mut_refs,                     <span class="comment">// https://github.com/rust-lang/rust/issues/57349
     </span>decl_macro,                         <span class="comment">// https://github.com/rust-lang/rust/issues/39412

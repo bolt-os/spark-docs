@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["alloc_frames","free_frames","generate_limine_memory_map","init"],"static":["MAX_PHYS_ADDR"]};
+window.SIDEBAR_ITEMS = {"fn":["alloc_frames","free_frames","generate_limine_memory_map","init"],"static":["MAX_PHYS_ADDR","PHYSMAP"]};
