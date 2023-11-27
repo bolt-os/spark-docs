@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["TokenKind","Value"],"fn":["parse_config_file"],"struct":["Entry","Lexer","Param","Parser","SourceLocation","Token"]};

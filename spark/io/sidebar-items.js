@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["init"],"static":["LOGGER"],"struct":["Logger"],"type":["Result"]};

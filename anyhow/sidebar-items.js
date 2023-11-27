@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["Ok"],"macro":["anyhow","bail","ensure"],"struct":["Error"],"trait":["Context"],"type":["Result"]};

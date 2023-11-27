@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["PAGE_SHIFT","PAGE_SIZE"],"enum":["MapError","MemoryType","PagingMode"],"fn":["get_max_paging_mode","invalidate_page","pow2_is_aligned"],"struct":["AddressSpace","MapFlags","Mapping"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["maybe_static_arc"]};

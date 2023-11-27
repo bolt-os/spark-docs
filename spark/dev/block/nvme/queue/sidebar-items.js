@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["CompletionQueueEntry","CompletionStatus","QueuePair","SubmissionQueueEntry"]};

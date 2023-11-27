@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["fadt","madt"],"struct":["Header","RootTable","Rsdp"],"trait":["Bridge","Sdt"]};

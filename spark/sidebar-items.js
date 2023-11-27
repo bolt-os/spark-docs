@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["hcf","main"],"macro":["page_align_down","page_align_up","page_offset","pages_for","size_of"],"mod":["config","console","dev","fs","io","malloc","mem","panic","pmm","prelude","proto","rtld","smp","sys","time","trap","util","vmm"],"static":["BOOT_HART_ID","SPARK_CFG_PATHS"],"type":["Result"]};

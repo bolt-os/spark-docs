@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["AddressSpace"],"fn":["alloc_resources","busdev_iter","device_kind","fdt_init","fdt_parse_cells","probe"],"mod":["bar","device","ecam"],"static":["PCIE_DRIVER"],"struct":["BusAddr","BusRange","DriverCompat","HostBridge","Range","RangeFlags"]};

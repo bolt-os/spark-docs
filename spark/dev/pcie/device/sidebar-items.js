@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["DeviceKind"],"struct":["CommandRegister","Device","DeviceIdent"]};

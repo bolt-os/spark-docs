@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["EXTENSION_ID"],"enum":["ResetReason","ResetType"],"fn":["system_reset"]};

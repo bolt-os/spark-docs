@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["alloc_frames","alloc_frames_impl","free_frames","free_frames_impl","generate_limine_memory_map","generate_limine_memory_map_impl","init"],"mod":["freelist_allocator","init_ranges"],"static":["MAX_PHYS_ADDR","PHYSMAP"]};

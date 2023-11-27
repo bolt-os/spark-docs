@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["SbiConsole"],"static":["SBI_CONSOLE"]};

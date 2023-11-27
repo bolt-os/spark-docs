@@ -1,1 +1,0 @@
-window.ALL_CRATES = ["acpi","anyhow","bitflags","bytemuck","elf","fdt","gimli","libsa","limine","linkset","lock_api","log","sbi","scopeguard","spark","spin","unwinding","uuid"];

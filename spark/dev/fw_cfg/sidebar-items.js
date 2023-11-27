@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"mod":["mmio"],"struct":["DmaCommand","File","FwCfg"]};

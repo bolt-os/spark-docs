@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["MAGIC"],"fn":["get_symbol_map"],"struct":["Symbol","SymbolMap","SymbolMapHeader","SymbolRaw"]};

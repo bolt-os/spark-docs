@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Error"],"mod":["ns16550"],"struct":["Baud","BusAccess"],"trait":["UartDevice"],"type":["Result"]};

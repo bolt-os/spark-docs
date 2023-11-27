@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Queue"],"fn":["init_common","pci_init"],"mod":["controller","identify","queue"],"static":["NVME_DRIVER"],"struct":["ChainedPrpLists","Namespace","PrpList"]};

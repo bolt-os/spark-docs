@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["EXTENSION_ID"],"enum":["ExtensionAvailability","SbiImplId"],"fn":["impl_id","impl_version","marchid","mimpid","mvendorid","probe_extension","spec_version"],"struct":["SbiSpecVersion"]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Entry"],"fn":["iter_madt"],"struct":["Flags","InterruptSourceOverrideFlags","LocalApicFlags","Madt","RiscvIntcFlags"]};

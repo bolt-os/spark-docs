@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Superblock"],"mod":["private"],"struct":["Bpb","BpbFat12And16","BpbFat32","Common","Fat16","Fat32"],"trait":["FatType"]};
